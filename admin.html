@@ -1,0 +1,3914 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition — Professional Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* 🎨 Modern Enterprise Dark Theme */
+        :root {
+            --bg-darkest: #0a0f1d;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-surface: #161e2e;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-strong: rgba(255, 255, 255, 0.12);
+            --accent: #0ea5e9;
+            --accent-glow: rgba(14, 165, 233, 0.4);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #60a5fa;
+            --glass-bg: rgba(30, 41, 59, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --osd-bg: rgba(15, 23, 42, 0.85);
+            --osd-border: rgba(255, 255, 255, 0.1);
+            --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.12);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.16);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.24);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, var(--bg-darkest), var(--bg-dark));
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        /* 📡 Header — OSD-like bar */
+        .header {
+            background: var(--osd-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--osd-border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header h1 svg {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            padding: 0.5rem 1.25rem;
+            background: linear-gradient(135deg, #059669, #047857);
+            color: white;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(5, 150, 105, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #34d399;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.7;
+                transform: scale(1.15);
+            }
+        }
+
+        /* 📦 Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 3rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            /* Table Responsiveness */
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            /* Adjust Stats Grid for mobile */
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* 🔥 CRITICAL FIX: ensure only .active section is visible on mobile */
+            .section {
+                display: none !important;
+            }
+
+            .section.active {
+                display: block !important;
+            }
+        }
+
+        /* 🧭 Navigation Tabs */
+        .nav-tabs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .nav-tab {
+            padding: 0.875rem 1.125rem;
+            border: 1px solid var(--border);
+            background: var(--glass-bg);
+            color: var(--text-secondary);
+            font-size: 0.925rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 14px;
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: transparent;
+            transition: background 0.3s ease;
+        }
+
+        .nav-tab:hover {
+            transform: translateY(-3px);
+            background: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(14, 165, 233, 0.45);
+            border: none;
+        }
+
+        .nav-tab.active::before {
+            background: white;
+            height: 4px;
+        }
+
+        /* 📄 Sections */
+        .section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-strong);
+            padding: 1.75rem;
+            border-radius: 18px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .section.active::before {
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* 📊 Section Title */
+        .section-title {
+            font-size: 1.65rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+        }
+
+        .section-title svg {
+            width: 28px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+
+        /* 📈 Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            padding: 1.75rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.35s ease;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            background: rgba(30, 41, 59, 0.75);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-card.blue {
+            --gradient-start: #0ea5e9;
+            --gradient-end: #3b82f6;
+        }
+
+        .stat-card.green {
+            --gradient-start: #10b981;
+            --gradient-end: #059669;
+        }
+
+        .stat-card.purple {
+            --gradient-start: #8b5cf6;
+            --gradient-end: #6366f1;
+        }
+
+        .stat-card.orange {
+            --gradient-start: #f59e0b;
+            --gradient-end: #ea580c;
+        }
+
+        .stat-value {
+            font-size: 2.6rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        /* 📅 Period Selector */
+        .period-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .period-selector label {
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .period-selector input,
+        .period-selector select {
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            transition: all 0.2s;
+            min-width: 140px;
+        }
+
+        .period-selector input:focus,
+        .period-selector select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+        }
+
+        .btn-apply {
+            padding: 0.75rem 1.75rem;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .btn-apply:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5);
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+        }
+
+        /* 🗓️ Calendar */
+        .calendar-day {
+            min-height: 84px;
+            padding: 0.5rem;
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--bg-card);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .calendar-day:hover {
+            background: var(--bg-surface);
+            transform: scale(1.02);
+            z-index: 2;
+            box-shadow: var(--shadow-md);
+            border-radius: 6px;
+        }
+
+        .calendar-day:nth-child(7n) {
+            border-right: none;
+        }
+
+        .calendar-day.empty {
+            background: rgba(30, 41, 59, 0.4);
+            cursor: default;
+        }
+
+        .calendar-day.has-data {
+            background: rgba(14, 165, 233, 0.08);
+        }
+
+        .calendar-day.today {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: var(--warning);
+            box-shadow: inset 0 0 0 2px var(--warning);
+        }
+
+        .calendar-day.today .day-number {
+            color: var(--warning);
+            font-weight: 700;
+        }
+
+        .calendar-day.today.has-data {
+            background: rgba(245, 158, 11, 0.2);
+        }
+
+        .day-number {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.375rem;
+        }
+
+        .day-stats {
+            font-size: 0.75rem;
+            line-height: 1.3;
+            opacity: 0.9;
+        }
+
+        .visitor-count {
+            font-weight: 700;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .visit-count {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+        }
+
+        .calendar-loading {
+            grid-column: 1 / -1;
+            padding: 2.5rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        /* 🔍 Filters */
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-btn {
+            padding: 0.875rem 1.5rem;
+            border: 2px solid var(--border);
+            background: var(--bg-surface);
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .filter-btn:hover {
+            border-color: var(--accent);
+            background: rgba(14, 165, 233, 0.08);
+            color: var(--accent);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4);
+        }
+
+        .filter-badge {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.3rem 0.75rem;
+            border-radius: 14px;
+            font-size: 0.875rem;
+            font-weight: 700;
+        }
+
+        .filter-btn.active .filter-badge {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* 📋 Table */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0.75rem;
+            margin-top: 1rem;
+        }
+
+        th {
+            background: var(--osd-bg);
+            padding: 1.1rem 1.5rem;
+            text-align: left;
+            font-weight: 700;
+            color: var(--text-secondary);
+            font-size: 0.825rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border-radius: 12px 12px 0 0;
+            position: sticky;
+            top: 80px;
+            backdrop-filter: blur(12px);
+            z-index: 10;
+        }
+
+        td {
+            padding: 1.1rem 1.5rem;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+        tr:hover td {
+            background: var(--bg-surface);
+            border-color: var(--accent);
+        }
+
+        td:first-child {
+            border-left: 1px solid var(--border);
+            border-radius: 12px 0 0 12px;
+        }
+
+        td:last-child {
+            border-right: 1px solid var(--border);
+            border-radius: 0 12px 12px 0;
+        }
+
+        /* 🖼️ Photos */
+        .photo {
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
+            object-fit: cover;
+            border: 2px solid var(--border);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+            transition: all 0.2s;
+        }
+
+        .photo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+            border-color: var(--accent);
+        }
+
+        .photo-placeholder {
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #334155, #1e293b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            color: var(--text-muted);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+        }
+
+        /* 🏷️ Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.1rem;
+            border-radius: 14px;
+            font-size: 0.875rem;
+            font-weight: 700;
+            backdrop-filter: blur(6px);
+        }
+
+        .badge.new {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            box-shadow: 0 3px 10px rgba(14, 165, 233, 0.3);
+        }
+
+        .badge.known {
+            background: linear-gradient(135deg, #64748b, #475569);
+            color: white;
+            box-shadow: 0 3px 10px rgba(100, 116, 139, 0.3);
+        }
+
+        .badge.employee {
+            background: linear-gradient(135deg, #10b981, #047857);
+            color: white;
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
+        }
+
+        /* 🖱️ Buttons */
+        .btn {
+            padding: 0.75rem 1.35rem;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            box-shadow: var(--shadow-sm);
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #047857);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.55rem 1.1rem;
+            font-size: 0.85rem;
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        /* 🎭 Empty & Loading States */
+        .empty-state {
+            text-align: center;
+            padding: 4.5rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 4.5rem;
+            margin-bottom: 1.25rem;
+            opacity: 0.4;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3.5rem;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            width: 52px;
+            height: 52px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.75rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 🖼️ Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(7, 17, 34, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-strong);
+            color: var(--text-primary);
+            border-radius: 24px;
+            padding: 2.25rem;
+            max-width: 940px;
+            width: 100%;
+            max-height: 92vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: modalSlideIn 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.12);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .modal-title svg {
+            width: 26px;
+            height: 26px;
+        }
+
+        .modal-close {
+            width: 44px;
+            height: 44px;
+            border: none;
+            background: var(--bg-surface);
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 1.35rem;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: #334155;
+            color: var(--text-primary);
+            transform: rotate(90deg);
+        }
+
+        /* 📋 Visit Items */
+        .visit-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 1.75rem;
+            background: var(--bg-surface);
+            border-radius: 16px;
+            transition: all 0.25s;
+            margin-bottom: 0.75rem;
+            border: 1px solid var(--border);
+        }
+
+        .visit-item:hover {
+            background: #1e293b;
+            transform: translateX(5px);
+            border-color: var(--accent);
+        }
+
+        .visit-date {
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 0.95rem;
+        }
+
+        .visit-time {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .visit-duration {
+            padding: 0.4rem 1rem;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            border-radius: 14px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        /* 📹 Camera Block */
+        .camera-container {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            aspect-ratio: 16/9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-strong);
+        }
+
+        #camera-stream,
+        #camera-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        #camera-overlay,
+        #camera-rect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        #camera-rect {
+            pointer-events: auto;
+            z-index: 10;
+        }
+
+        /* 👥 Active Visitor Items */
+        .active-visitor-item {
+            padding: 1rem;
+            background: var(--bg-surface);
+            border-radius: 14px;
+            border-left: 4px solid var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 0.85rem;
+            animation: slideInItem 0.35s ease-out;
+        }
+
+        @keyframes slideInItem {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* 👥 Active Visitors Grid (NEW) */
+        #active-visitors-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .person-card-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background: var(--bg-surface);
+            padding: 1.5rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+            min-height: 200px;
+            justify-content: center;
+        }
+
+        .person-card-item:hover {
+            transform: translateY(-5px);
+            background: var(--bg-card);
+            box-shadow: var(--shadow-md);
+            border-color: var(--accent);
+        }
+
+        .person-card-item.employee {
+            border-left: 4px solid #10b981;
+        }
+
+        .person-card-item.visitor {
+            border-left: 4px solid #0ea5e9;
+        }
+
+        .person-card-item.leaving {
+            opacity: 0;
+            transform: scale(0.9);
+            pointer-events: none;
+        }
+
+        .person-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(30, 41, 59, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            border: 3px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .person-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .person-info-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .person-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .person-status-line {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .person-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.4rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        /* 📱 Responsive */
+        @media (max-width: 768px) {
+            .container {
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* 🔥 Removed order: -1 — we now control visibility via .active */
+            .nav-tabs {
+                grid-template-columns: repeat(4, 1fr);
+                padding: 0.5rem;
+                overflow-x: auto;
+            }
+
+            .nav-tab {
+                flex-direction: column;
+                font-size: 0.75rem;
+                padding: 0.5rem;
+                gap: 0.2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .period-selector {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .calendar-day {
+                min-height: 70px;
+                padding: 0.35rem;
+            }
+
+            .day-number {
+                font-size: 0.8rem;
+            }
+
+            .day-stats {
+                font-size: 0.68rem;
+            }
+
+            .section-title {
+                font-size: 1.4rem;
+            }
+
+            .header h1 {
+                font-size: 1.1rem;
+            }
+
+            .modal-content {
+                padding: 1.2rem;
+                width: 95%;
+                max-height: 90vh;
+            }
+
+            #section-camera>div {
+                grid-template-columns: 1fr !important;
+            }
+
+            .camera-container {
+                aspect-ratio: 4/3;
+            }
+        }
+
+        /* 🔧 Utility Icons (inline SVG) */
+        .icon-analytics {
+            fill: currentColor;
+        }
+
+        .icon-clients {
+            fill: currentColor;
+        }
+
+        .icon-calendar {
+            fill: currentColor;
+        }
+
+        .icon-camera {
+            fill: currentColor;
+        }
+
+        .icon-live {
+            fill: white;
+        }
+
+        /* 🍔 Mobile Menu — ✅ Fixed position & behavior */
+        .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .mobile-nav {
+            position: fixed;
+            top: 70px;
+            /* JS will adjust */
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 999;
+            /* above sections */
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            transform: translateY(-150%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .mobile-nav.active {
+            transform: translateY(0);
+        }
+
+        .mobile-nav-item {
+            padding: 1rem;
+            border-radius: 12px;
+            background: var(--bg-surface);
+            color: var(--text-secondary);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border: 1px solid var(--border);
+            text-decoration: none;
+        }
+
+        .mobile-nav-item.active {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            border-color: transparent;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-tabs {
+                display: none;
+            }
+
+            .header {
+                padding: 0.75rem 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-content">
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                    <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+                </svg>
+            </button>
+            <h1>
+                <svg viewBox="0 0 24 24" width="24" height="24" class="icon-analytics">
+                    <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" fill="currentColor" />
+                </svg>
+                Face Admin
+            </h1>
+            <div class="live-indicator">
+                <svg class="live-dot" viewBox="0 0 12 12">
+                    <circle cx="6" cy="6" r="5" fill="white" />
+                </svg>
+                LIVE
+            </div>
+        </div>
+    </div>
+    <!-- 🍔 Mobile Navigation Menu -->
+    <div id="mobile-nav" class="mobile-nav">
+        <div class="mobile-nav-item active" onclick="switchTabAndClose('camera')">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                <path
+                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+            Камера
+        </div>
+        <div class="mobile-nav-item" onclick="switchTabAndClose('clients')">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                <path
+                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+            Клиенты
+        </div>
+        <div class="mobile-nav-item" onclick="switchTabAndClose('analytics')">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                <path
+                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
+            </svg>
+            Аналитика
+        </div>
+        <div class="mobile-nav-item" onclick="switchTabAndClose('calendar')">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                <path
+                    d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z" />
+            </svg>
+            Календарь
+        </div>
+    </div>
+    <div class="container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('analytics')">
+                <svg viewBox="0 0 24 24" width="20" height="20" class="icon-analytics">
+                    <path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="currentColor" />
+                </svg>
+                Аналитика
+            </button>
+            <button class="nav-tab" onclick="switchTab('clients')">
+                <svg viewBox="0 0 24 24" width="20" height="20" class="icon-clients">
+                    <path
+                        d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                        fill="currentColor" />
+                </svg>
+                Клиенты
+            </button>
+            <button class="nav-tab" onclick="switchTab('calendar')">
+                <svg viewBox="0 0 24 24" width="20" height="20" class="icon-calendar">
+                    <path
+                        d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"
+                        fill="currentColor" />
+                </svg>
+                Календарь
+            </button>
+            <button class="nav-tab" onclick="switchTab('camera')">
+                <svg viewBox="0 0 24 24" width="20" height="20" class="icon-camera">
+                    <path
+                        d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                        fill="currentColor" />
+                </svg>
+                Камера
+            </button>
+        </div>
+        <!-- Analytics Section -->
+        <div id="section-analytics" class="section active">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" width="28" height="28" class="icon-analytics">
+                    <path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z" fill="currentColor" />
+                </svg>
+                Аналитика посещений
+            </h2>
+            <div class="period-selector">
+                <label>📅 Период:</label>
+                <input type="date" id="date-from">
+                <label>до</label>
+                <input type="date" id="date-to">
+                <button class="btn-apply" onclick="applyPeriod()">
+                    <svg viewBox="0 0 20 20" width="16" height="16">
+                        <path
+                            d="M16.707 5.293a1 1 0 00-1.414 0L9 11.586 5.707 8.293a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l7-7a1 1 0 000-1.414z"
+                            fill="currentColor" />
+                    </svg>
+                    Применить
+                </button>
+                <button class="btn-apply" onclick="setQuickPeriod('today')">Сегодня</button>
+                <button class="btn-apply" onclick="setQuickPeriod('week')">Неделя</button>
+                <button class="btn-apply" onclick="setQuickPeriod('month')">Месяц</button>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card blue">
+                    <div class="stat-value" id="stat-total">0</div>
+                    <div class="stat-label">Визитов за период</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-value" id="stat-unique">0</div>
+                    <div class="stat-label">Уникальных за период</div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="stat-value" id="stat-avg">0</div>
+                    <div class="stat-label">В среднем/день</div>
+                </div>
+                <div class="stat-card orange">
+                    <div class="stat-value" id="stat-minutes">0</div>
+                    <div class="stat-label">Минут (общее время)</div>
+                </div>
+            </div>
+            <div class="stats-grid" style="margin-bottom:2rem;">
+                <div class="stat-card green">
+                    <div class="stat-value" id="stat-unique-all">0</div>
+                    <div class="stat-label">Всего уникальных посетителей</div>
+                </div>
+                <div class="stat-card blue">
+                    <div class="stat-value" id="stat-total-all">0</div>
+                    <div class="stat-label">Всего визитов</div>
+                </div>
+            </div>
+            <h3 class="section-title" style="font-size: 1.35rem; margin-top: 2rem;">
+                <svg viewBox="0 0 24 24" width="22" height="22">
+                    <path d="M7 15h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z" fill="currentColor" />
+                </svg>
+                Статистика по дням
+            </h3>
+            <div id="daily-stats" style="max-height: 600px; overflow-y: auto;">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Загрузка...
+                </div>
+            </div>
+        </div>
+        <!-- Clients Section -->
+        <div id="section-clients" class="section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" width="28" height="28" class="icon-clients">
+                    <path
+                        d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
+                        fill="currentColor" />
+                </svg>
+                База клиентов
+            </h2>
+            <div class="filters">
+                <button class="filter-btn active" onclick="filterClients('all')" data-filter="all">
+                    Все <span class="filter-badge" id="count-all">0</span>
+                </button>
+                <button class="filter-btn" onclick="filterClients('visitors')" data-filter="visitors">
+                    👤 Посетители <span class="filter-badge" id="count-visitors">0</span>
+                </button>
+                <button class="filter-btn" onclick="filterClients('employees')" data-filter="employees">
+                    🔒 Сотрудники <span class="filter-badge" id="count-employees">0</span>
+                </button>
+                <button class="filter-btn" onclick="filterClients('active')" data-filter="active">
+                    🎯 Сейчас в кадре <span class="filter-badge" id="count-active">0</span>
+                </button>
+                <button class="btn btn-primary btn-sm" style="margin-left:auto;" onclick="openAddClientModal()">
+                    ➕ Добавить нового клиента
+                </button>
+            </div>
+            <div id="clients-table">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Загрузка клиентов...
+                </div>
+            </div>
+        </div>
+        <!-- Calendar Section -->
+        <div id="section-calendar" class="section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" width="28" height="28" class="icon-calendar">
+                    <path
+                        d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"
+                        fill="currentColor" />
+                </svg>
+                Календарь посещений
+            </h2>
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding: 0.75rem 1rem; background: var(--bg-surface); border-radius: 14px; border: 1px solid var(--border);">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <button onclick="prevMonth()"
+                        style="width: 36px; height: 36px; border: 1px solid var(--border); background: var(--bg-card); border-radius: 10px; cursor: pointer; font-size: 1.1rem; color: var(--text-secondary); display: flex; align-items: center; justify-content: center;">
+                        ◀
+                    </button>
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: var(--text-primary); min-width: 140px; text-align: center;"
+                        id="calendar-month-title">
+                        Январь 2025
+                    </h3>
+                    <button onclick="nextMonth()"
+                        style="width: 36px; height: 36px; border: 1px solid var(--border); background: var(--bg-card); border-radius: 10px; cursor: pointer; font-size: 1.1rem; color: var(--text-secondary); display: flex; align-items: center; justify-content: center;">
+                        ▶
+                    </button>
+                </div>
+                <button onclick="goToToday()"
+                    style="padding: 0.45rem 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.875rem; color: var(--text-secondary);">
+                    Сегодня
+                </button>
+            </div>
+            <div
+                style="background: var(--bg-card); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+                <div
+                    style="display: grid; grid-template-columns: repeat(7, 1fr); background: var(--bg-surface); border-bottom: 1px solid var(--border);">
+                    <div
+                        style="padding: 0.5rem 0; text-align: center; font-weight: 600; font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase;">
+                        Пн</div>
+                    <div
+                        style="padding: 0.5rem 0; text-align: center; font-weight: 600; font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase;">
+                        Вт</div>
+                    <div
+                        style="padding: 0.5rem 0; text-align: center; font-weight: 600; font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase;">
+                        Ср</div>
+                    <div
+                        style="padding: 0.5rem 0; text-align: center; font-weight: 600; font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase;">
+                        Чт</div>
+                    <div
+                        style="padding: 0.5rem 0; text-align: center; font-weight: 600; font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase;">
+                        Пт</div>
+                    <div
+                        style="padding: 0.5rem 0; text-align: center; font-weight: 600; font-size: 0.78rem; color: var(--danger); text-transform: uppercase;">
+                        Сб</div>
+                    <div
+                        style="padding: 0.5rem 0; text-align: center; font-weight: 600; font-size: 0.78rem; color: var(--danger); text-transform: uppercase;">
+                        Вс</div>
+                </div>
+                <div id="calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr);">
+                </div>
+            </div>
+            <div
+                style="display: flex; justify-content: center; gap: 1rem; margin-top: 1.25rem; padding: 0.6rem; font-size: 0.8rem; color: var(--text-muted);">
+                <div style="display: flex; align-items: center; gap: 0.3rem;">
+                    <div style="width: 10px; height: 10px; border-radius: 2px; background: var(--bg-surface);"></div>
+                    <span>Нет посещений</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.3rem;">
+                    <div style="width: 10px; height: 10px; border-radius: 2px; background: var(--accent);"></div>
+                    <span>Есть посещения</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.3rem;">
+                    <div style="width: 10px; height: 10px; border-radius: 2px; background: var(--warning);"></div>
+                    <span>Сегодня</span>
+                </div>
+            </div>
+        </div>
+        <!-- Camera Section -->
+        <div id="section-camera" class="section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" width="28" height="28" class="icon-camera">
+                    <path
+                        d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                        fill="currentColor" />
+                </svg>
+                Онлайн-камера + Посетители в кадре
+            </h2>
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; align-items: start;">
+                <div id="camera-block">
+                    <div class="camera-container"
+                        style="position: relative; width: 100%; aspect-ratio: 16/9; background: #000; overflow: hidden; border-radius: 16px;">
+                        <div id="video-loading"
+                            style="position: absolute; color: white; display: none; z-index: 20; flex-direction: column; align-items: center; gap: 12px; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                            <div class="spinner" style="border-color: rgba(255,255,255,0.3); border-top-color: white;">
+                            </div>
+                            <span>Загрузка потока...</span>
+                        </div>
+                        <video id="camera-stream" autoplay muted playsinline
+                            style="width: 100%; height: 100%; object-fit: contain; display: none;"></video>
+                        <img id="camera-image" style="width: 100%; height: 100%; object-fit: contain; display: none;"
+                            src="">
+                        <canvas id="camera-overlay"
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
+                        <!-- ✅ Added for green squares -->
+                        <canvas id="camera-rect"
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10;"></canvas>
+                    </div>
+                    <div style="margin-top: 1.25rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                        <label for="camera-source"
+                            style="font-weight: 600; color: var(--text-primary);">Источник:</label>
+                        <select id="camera-source" onchange="updateCameraSettings()"
+                            style="padding: 0.6rem 1rem; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-primary);">
+                            <option value="none" selected>Не выбрано</option>
+                            <option value="imou">Imou (Cloud)</option>
+                            <option value="reolink">Reolink (RTSP #1)</option>
+                            <option value="second_rtsp">RTSP Stream #2 (192.168.1.65)</option>
+                            <option value="local">Local USB</option>
+                            <option value="webrtc">Device Camera (WebRTC)</option>
+                            <option value="external_webrtc">External WebRTC (TailScale)</option>
+                        </select>
+                        <label for="video-quality"
+                            style="font-weight: 600; margin-left: 1rem; color: var(--text-primary);">Качество:</label>
+                        <select id="video-quality" onchange="updateCameraSettings()"
+                            style="padding: 0.6rem 1rem; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-primary);">
+                            <option value="SD">SD (Sub Stream)</option>
+                            <option value="HD">HD (Main Stream)</option>
+                        </select>
+                        <span id="quality-status"
+                            style="font-size: 0.85rem; color: var(--accent); margin-left: 1rem;"></span>
+                        <span id="camera-status"
+                            style="font-size: 0.85rem; color: var(--text-muted); margin-left: auto;"></span>
+                        <button id="save-rect-btn" class="btn btn-success btn-sm" style="display:none;">Сохранить
+                            выделенное лицо</button>
+                    </div>
+                </div>
+                <div style="
+background: linear-gradient(135deg, #1e293b, #0f172a);
+border-radius: 20px;
+padding: 1.75rem;
+border: 1px solid rgba(14, 165, 233, 0.15);
+height: 100%;
+min-height: 300px;
+display: flex;
+flex-direction: column;
+box-shadow: var(--shadow-md);
+">
+                    <h3 style="
+font-size: 1.2rem;
+font-weight: 700;
+margin-bottom: 1.5rem;
+color: var(--text-primary);
+display: flex;
+align-items: center;
+gap: 0.6rem;
+">
+                        <svg viewBox="0 0 24 24" width="20" height="20">
+                            <path
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+                                fill="currentColor" />
+                        </svg>
+                        Сейчас в кадре
+                        <span style="
+background: linear-gradient(135deg, #0ea5e9, #0284c7);
+color: white;
+padding: 0.3rem 0.9rem;
+border-radius: 14px;
+font-size: 0.9rem;
+font-weight: 700;
+margin-left: auto;
+" id="active-count">0</span>
+                    </h3>
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+                        <div
+                            style="background: rgba(14, 165, 233, 0.15); color: #0ea5e9; padding: 0.35rem 0.9rem; border-radius: 10px; font-size: 0.95rem; font-weight: 600;">
+                            Всего людей: <span id="total-real-count">0</span>
+                        </div>
+                        <div
+                            style="background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 0.35rem 0.9rem; border-radius: 10px; font-size: 0.95rem;">
+                            Распознано: <span id="recognized-count">0</span>
+                        </div>
+                        <div
+                            style="background: rgba(239, 68, 68, 0.15); color: #ef4444; padding: 0.35rem 0.9rem; border-radius: 10px; font-size: 0.95rem;">
+                            Не распознано: <span id="unrecognized-count">0</span>
+                        </div>
+                    </div>
+                    <div id="active-visitors-list"
+                        style="flex: 1; min-height: 220px; max-height: calc(100vh - 500px); overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: 0.75rem; padding: 6px;">
+                        <div
+                            style="text-align: center; color: var(--text-muted); padding: 2.5rem 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1;">
+                            <div style="font-size: 2.8rem; margin-bottom: 0.8rem; opacity: 0.4;">👤</div>
+                            <div style="font-size: 0.95rem;">Загрузка...</div>
+                        </div>
+                    </div>
+                    <div style="
+margin-top: auto;
+padding-top: 1.1rem;
+border-top: 1px solid var(--border);
+font-size: 0.82rem;
+color: var(--text-muted);
+text-align: center;
+">
+                        ⏱️ Обновляется каждые 2 сек
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modals -->
+    <div class="modal" id="add-client-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <svg viewBox="0 0 24 24" width="26" height="26">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor" />
+                    </svg>
+                    Добавить нового клиента
+                </h2>
+                <button class="modal-close" onclick="closeAddClientModal()">✕</button>
+            </div>
+            <form id="add-client-form" onsubmit="submitAddClient(event)">
+                <div style="margin-bottom: 1.75rem;">
+                    <label
+                        style="display: block; font-weight: 600; color: var(--text-muted); margin-bottom: 0.6rem;">Имя
+                        клиента:</label>
+                    <input type="text" id="add-client-name" placeholder="Введите имя..."
+                        style="width: 100%; padding: 0.85rem; border: 2px solid var(--border); border-radius: 12px; font-size: 0.95rem; background: var(--bg-surface); color: var(--text-primary);">
+                </div>
+                <div style="margin-bottom: 1.75rem;">
+                    <label
+                        style="display: block; font-weight: 600; color: var(--text-muted); margin-bottom: 0.6rem;">Фото
+                        для распознавания:</label>
+                    <input type="file" id="add-client-photo" accept="image/*" style="width: 100%;">
+                </div>
+                <div style="text-align: right;">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="closeAddClientModal()"
+                        style="margin-right: 1rem;">Отмена</button>
+                    <button type="submit" class="btn btn-success btn-sm">Добавить</button>
+                </div>
+            </form>
+            <div id="add-client-status" style="margin-top:1.2rem; color:#0ea5e9; font-weight:600;"></div>
+        </div>
+    </div>
+    <div class="modal" id="client-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">
+                    <svg viewBox="0 0 24 24" width="26" height="26">
+                        <path
+                            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                            fill="currentColor" />
+                    </svg>
+                    Профиль клиента
+                </h2>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <!-- Name Edit -->
+            <div
+                style="margin-bottom: 1.75rem; padding: 1.1rem; background: var(--bg-surface); border-radius: 16px; border: 1px solid var(--border);">
+                <label
+                    style="display: block; font-weight: 600; color: var(--text-muted); margin-bottom: 0.6rem;">Имя:</label>
+                <div style="display: flex; gap: 0.6rem;">
+                    <input type="text" id="modal-name-input" placeholder="Введите имя..."
+                        style="flex: 1; padding: 0.85rem; border: 2px solid var(--border); border-radius: 12px; font-size: 0.95rem; background: var(--bg-card); color: var(--text-primary);">
+                    <button class="btn btn-success" onclick="saveClientName()" style="white-space: nowrap;">
+                        <svg viewBox="0 0 20 20" width="16" height="16">
+                            <path
+                                d="M16.707 5.293a1 1 0 010 1.414L6.414 17l-4.293-4.293a1 1 0 011.414-1.414L6 14.586l9.293-9.293a1 1 0 011.414 0z"
+                                fill="currentColor" />
+                        </svg>
+                        Сохранить
+                    </button>
+                </div>
+            </div>
+            <!-- Primary Photo -->
+            <div style="margin-bottom: 1.75rem;">
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.8rem;">📸
+                    Основная фотография</h3>
+                <div id="modal-primary-photo"
+                    style="display: flex; justify-content: center; padding: 1.2rem; background: var(--bg-surface); border-radius: 18px; border: 1px solid var(--border);">
+                    <div class="photo-placeholder" style="width: 160px; height: 160px; font-size: 3.2rem;">👤</div>
+                </div>
+            </div>
+            <!-- Additional Photos -->
+            <div style="margin-bottom: 1.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                    <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin: 0;">📷
+                        Дополнительные фотографии</h3>
+                    <label class="btn btn-primary btn-sm" style="cursor: pointer; margin: 0;">
+                        ➕ Добавить фото
+                        <input type="file" id="photo-upload" accept="image/*" style="display: none;"
+                            onchange="uploadPhoto()">
+                    </label>
+                </div>
+                <div id="modal-additional-photos"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1.1rem;">
+                    <div style="text-align: center; color: var(--text-muted); padding: 2.2rem;">Нет дополнительных
+                        фотографий</div>
+                </div>
+            </div>
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card blue">
+                    <div class="stat-value" id="modal-visits-total">0</div>
+                    <div class="stat-label">Всего визитов</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-value" id="modal-visits-month">0</div>
+                    <div class="stat-label">За месяц</div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="stat-value" id="modal-visits-week">0</div>
+                    <div class="stat-label">За неделю</div>
+                </div>
+                <div class="stat-card orange">
+                    <div class="stat-value" id="modal-minutes-total">0</div>
+                    <div class="stat-label">Минут (всего)</div>
+                </div>
+            </div>
+            <h3 class="section-title" style="font-size: 1.25rem; margin-top: 2.2rem;">
+                <svg viewBox="0 0 24 24" width="22" height="22">
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"
+                        fill="currentColor" />
+                </svg>
+                История визитов по дням
+            </h3>
+            <div class="visit-list" id="visit-list">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Загрузка истории...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="day-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="day-modal-title">
+                    <svg viewBox="0 0 24 24" width="26" height="26">
+                        <path
+                            d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"
+                            fill="currentColor" />
+                    </svg>
+                    Посещения за день
+                </h2>
+                <button class="modal-close" onclick="closeDayModal()">✕</button>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card blue">
+                    <div class="stat-value" id="day-visitors">0</div>
+                    <div class="stat-label">Посетителей</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-value" id="day-visits">0</div>
+                    <div class="stat-label">Визитов</div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="stat-value" id="day-minutes">0</div>
+                    <div class="stat-label">Минут</div>
+                </div>
+            </div>
+            <h3 class="section-title" style="font-size: 1.25rem; margin-top: 2.2rem;">
+                <svg viewBox="0 0 24 24" width="22" height="22">
+                    <path
+                        d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                        fill="currentColor" />
+                </svg>
+                Список посетителей
+            </h3>
+            <div id="day-visitors-list">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Загрузка...
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // ⚙️ FULL JS LOGIC — WITH MOBILE FIXES
+        const API_BASE = window.location.origin;
+        let allFacesData = [];
+        let currentFilter = 'all';
+
+        function init() {
+            initDates();
+            loadData();
+            setupWebSocket();
+            setupTracksWebSocket(); // ✅ NEW: Tracks
+            loadCalendar();
+            setInterval(loadData, 5000); // Reduced frequency for stats
+            // 📱 Mobile Default: Show Camera
+            if (window.innerWidth <= 768) {
+                switchTab('camera');
+                // Fix mobile-nav top position
+                const header = document.querySelector('.header');
+                if (header) {
+                    const headerHeight = header.offsetHeight;
+                    document.getElementById('mobile-nav').style.top = headerHeight + 'px';
+                }
+            }
+        }
+
+        async function initCameraSettings() {
+            try {
+                const res = await fetch(`${API_BASE}/camera/status`);
+                const data = await res.json();
+                // Если source не задан или "none", выбрать "Не выбрано"
+                document.getElementById('camera-source').value = data.source || "none";
+                document.getElementById('video-quality').value = data.quality || "SD";
+            } catch (e) {
+                console.error("Failed to load camera settings:", e);
+                document.getElementById('camera-source').value = "none";
+                document.getElementById('video-quality').value = "SD";
+            }
+        }
+
+        async function updateCameraSettings() {
+            const source = document.getElementById('camera-source').value;
+            const quality = document.getElementById('video-quality').value;
+            const statusEl = document.getElementById('camera-status');
+            statusEl.textContent = "🔄 Переключение...";
+
+            try {
+                // ✅ Special handling for WebRTC: establish connection FIRST
+                if (source === 'webrtc') {
+                    statusEl.textContent = "🔄 Connecting WebRTC...";
+
+                    try {
+                        // Wait for WebRTC to fully connect before switching backend
+                        await window.startWebRTC();
+
+                        // Now that WebRTC is connected, switch backend to consume frames
+                        statusEl.textContent = "🔄 Switching backend to WebRTC...";
+                        const res = await fetch(`${API_BASE}/camera/switch`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ source, quality })
+                        });
+
+                        if (res.ok) {
+                            statusEl.textContent = "✅ WebRTC Active";
+                            setTimeout(() => statusEl.textContent = "", 2000);
+                        } else {
+                            statusEl.textContent = "❌ Backend switch failed";
+                            console.error('Backend camera switch failed');
+                        }
+                    } catch (e) {
+                        statusEl.textContent = "❌ WebRTC Failed";
+                        console.error('WebRTC setup failed:', e);
+                        // Switch back to previous source
+                        document.getElementById('camera-source').value = 'imou';
+                    }
+                    return;
+                }
+
+                // ✅ For other sources, switch backend first, then load stream
+                const res = await fetch(`${API_BASE}/camera/switch`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ source, quality })
+                });
+
+                if (res.ok) {
+                    statusEl.textContent = "✅ Готово";
+                    setTimeout(() => statusEl.textContent = "", 2000);
+                    // ✅ Reload stream to properly switch between sources
+                    if (window.loadStream) {
+                        window.loadStream(quality);
+                    } else if (window.reloadCameraStream) {
+                        window.reloadCameraStream();
+                    }
+                } else {
+                    statusEl.textContent = "❌ Ошибка";
+                    alert("Ошибка переключения камеры");
+                }
+            } catch (e) {
+                console.error(e);
+                statusEl.textContent = "❌ Ошибка сети";
+            }
+        }
+
+        function initDates() {
+            const today = new Date();
+            const weekAgo = new Date(today);
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            document.getElementById('date-from').value = formatDateInput(weekAgo);
+            document.getElementById('date-to').value = formatDateInput(today);
+        }
+
+        function formatDateInput(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function setupWebSocket() {
+            let ws;
+            function connect() {
+                const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                ws = new WebSocket(`${proto}//${window.location.host}/ws/updates`);
+                ws.onopen = () => console.log('✅ Base WebSocket connected');
+                ws.onmessage = (event) => {
+                    if (event.data === "update") {
+                        console.log('🔄 Reloading data...');
+                        loadData();
+                        loadCalendar();
+                    }
+                };
+                ws.onclose = () => {
+                    console.log('❌ Base WebSocket closed, reconnecting...');
+                    setTimeout(connect, 2000);
+                };
+                ws.onerror = (e) => {
+                    console.error('WebSocket error:', e);
+                    ws.close();
+                };
+            }
+            connect();
+        }
+
+        // ✅ NEW: Real-time Tracks WebSocket
+        let tracksWs;
+        let activeTracks = [];
+        let lastFullUpdate = 0;
+
+        function setupTracksWebSocket() {
+            function connectTracks() {
+                const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                tracksWs = new WebSocket(`${proto}//${window.location.host}/ws/tracks`);
+                tracksWs.onopen = () => console.log('✅ Tracks WebSocket connected');
+                tracksWs.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data.type === 'tracks_update') {
+                            updateLocalTracks(data.tracks, data.removed);
+                            requestAnimationFrame(drawFrontendOverlay);
+                            // Throttled UI list update (every 500ms max)
+                            const now = Date.now();
+                            if (now - lastFullUpdate > 500) {
+                                renderActiveVisitorsList();
+                                lastFullUpdate = now;
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error parsing track data:', e);
+                    }
+                };
+                tracksWs.onclose = () => {
+                    console.log('⚠️ Tracks WebSocket closed, reconnecting...');
+                    setTimeout(connectTracks, 1000);
+                };
+            }
+            connectTracks();
+        }
+
+        function updateLocalTracks(updates, removed) {
+            // updates is a list of track objects
+            // removed is a list of track IDs
+
+            // Create map for easy access
+            const currentMap = new Map(activeTracks.map(t => [t.id, t]));
+
+            // Apply updates
+            updates.forEach(track => {
+                // ✅ 3. Улучшить логику слияния треков с одинаковым person_id
+                if (track.person_id) {
+                    const existing = Array.from(currentMap.values()).find(t => t.person_id === track.person_id);
+                    if (existing) {
+                        // If we found a track with the same person_id but different track.id
+                        // We should migrate the map key to the new track.id to avoid "losing" it if the old ID is removed
+                        if (existing.id !== track.id) {
+                            currentMap.delete(existing.id);
+                            currentMap.set(track.id, existing);
+                        }
+                        // Update existing object
+                        Object.assign(existing, track);
+                        return;
+                    }
+                }
+                currentMap.set(track.id, track);
+            });
+
+            // Remove old
+            removed.forEach(id => {
+                // Only delete if it exists (might have been moved/merged already)
+                if (currentMap.has(id)) {
+                    currentMap.delete(id);
+                }
+            });
+
+            activeTracks = Array.from(currentMap.values());
+
+            // Update counts
+            const recognized = activeTracks.filter(t => t.recognized).length;
+            const unrecognized = activeTracks.length - recognized;
+
+            const activeCountEl = document.getElementById('active-count');
+            if (activeCountEl) activeCountEl.textContent = activeTracks.length; // Will be refined in render
+
+            const recCountEl = document.getElementById('recognized-count');
+            if (recCountEl) recCountEl.textContent = recognized;
+
+            const unrecCountEl = document.getElementById('unrecognized-count');
+            if (unrecCountEl) unrecCountEl.textContent = unrecognized;
+        }
+        function drawFrontendOverlay() {
+            const canvas = document.getElementById('camera-overlay');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            return; // ❌ DISABLED: Backend draws boxes directly into the video stream now.
+        }
+
+        // ✅ Persistent Buffer for UI Stability
+        const bufferedTracks = new Map(); // id -> { data: track, lastSeen: timestamp }
+        const BUFFER_TTL = 3000; // 3 seconds persistence
+
+        function renderActiveVisitorsList() {
+            const container = document.getElementById('active-visitors-list');
+            if (!container) return;
+
+            const now = Date.now();
+
+            activeTracks.forEach(track => {
+                bufferedTracks.set(track.id, {
+                    data: track,
+                    lastSeen: now
+                });
+            });
+
+            // 2. Prune Stale (older than 3s)
+            for (const [id, entry] of bufferedTracks.entries()) {
+                if (now - entry.lastSeen > BUFFER_TTL) {
+                    bufferedTracks.delete(id);
+                }
+            }
+
+            // 3. Render from Buffer
+            let displayTracks = Array.from(bufferedTracks.values()).map(e => e.data);
+
+            // ✅ 4. Добавить защиту от дублей в renderActiveVisitorsList()
+            const seenPersonIds = new Set();
+            const uniqueDisplayTracks = [];
+            displayTracks.forEach(track => {
+                const key = track.person_id || track.id;
+                if (!seenPersonIds.has(key)) {
+                    seenPersonIds.add(key);
+                    uniqueDisplayTracks.push(track);
+                }
+            });
+            displayTracks = uniqueDisplayTracks;
+
+            // Removing "Loading" state
+            const isLoading = container.querySelector('.active-visitors-loading') || container.innerText.includes('Загрузка');
+            const hasData = displayTracks.length > 0;
+
+            if (!hasData) {
+                if (isLoading || container.children.length === 0 || container.querySelector('.active-track-item')) {
+                    container.innerHTML = `
+                        <div class="empty-state-active" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; color: var(--text-muted); transition: all 0.3s;">
+                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.5;">👀</div>
+                            <div>Никого в кадре</div>
+                        </div>`;
+                }
+                // Update badge count to 0
+                const countEl = document.getElementById('active-count');
+                if (countEl) countEl.textContent = 0;
+                return;
+            }
+
+            if (isLoading || container.querySelector('.empty-state-active')) {
+                container.innerHTML = '';
+            }
+
+            // ✅ FIX: Update the badge counter!
+            const countEl = document.getElementById('active-count');
+            if (countEl) countEl.textContent = displayTracks.length;
+
+            const totalRealCountEl = document.getElementById('total-real-count');
+            if (totalRealCountEl) totalRealCountEl.textContent = displayTracks.length;
+
+            // 4. Diff Updates based on person_id || id
+            const currentKeys = new Set(displayTracks.map(t => parseInt(t.person_id || t.id)));
+
+            // Remove Old from DOM
+            Array.from(container.children).forEach(child => {
+                if (child.classList.contains('active-track-item')) {
+                    // We prefer person_id as key per user instructions
+                    const key = parseInt(child.dataset.trackId); // This is now person_id OR track_id
+                    if (!currentKeys.has(key)) {
+                        child.remove();
+                    }
+                }
+            });
+
+            // Sort: Known > Unknown, then Confidence
+            displayTracks.sort((a, b) => {
+                if (a.recognized && !b.recognized) return -1;
+                if (!a.recognized && b.recognized) return 1;
+                return b.confidence - a.confidence;
+            });
+
+            // Update/Add
+            displayTracks.forEach(track => {
+                // ✅ 1. Использовать person_id как основной идентификатор в UI
+                const uniqueKey = track.person_id || track.id;
+                let item = container.querySelector(`.active-track-item[data-track-id="${uniqueKey}"]`);
+
+                let color = '#ef4444';
+                let type = 'Неизвестно';
+                let icon = '❓';
+                // Ensure employee overrides others
+                const isEmp = track.is_employee || (track.name && track.name.toLowerCase().startsWith('employee'));
+
+                if (isEmp) { color = '#10b981'; type = 'Сотрудник'; icon = '👔'; }
+                else if (track.recognized) { color = '#0ea5e9'; type = 'Посетитель'; icon = '👤'; }
+
+                const infoText = `${type} • ${Math.round(track.confidence * 100)}%`;
+                const displayName = track.name || 'Анализ...';
+
+                // Check for photo in cache (allFacesData)
+                let photoHtml = `<div class="photo-container" style="width: 42px; height: 42px; background: ${color}20; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">${icon}</div>`;
+
+                if (track.person_id) {
+                    const face = allFacesData.find(f => f.person_id === track.person_id || f.id === track.person_id);
+                    if (face && face.photo_base64) {
+                        photoHtml = `<div class="photo-container" style="width: 42px; height: 42px; border-radius: 8px; border: 2px solid ${color}; overflow: hidden;"><img src="data:image/jpeg;base64,${face.photo_base64}" style="width: 100%; height: 100%; object-fit: cover;"></div>`;
+                    }
+                }
+
+                if (!item) {
+                    item = document.createElement('div');
+                    item.className = 'active-track-item';
+                    item.dataset.trackId = uniqueKey; // ✅ Saved as person_id if available
+                    item.dataset.realTrackId = track.id; // Keep real track id for debug
+                    item.style.cssText = `
+                        display: flex; align-items: center; gap: 12px;
+                        padding: 12px; background: var(--bg-surface);
+                        border-radius: 12px; margin-bottom: 8px;
+                        border-left: 4px solid ${color};
+                        transition: all 0.3s ease-out;
+                    `;
+                    item.innerHTML = `
+                        ${photoHtml}
+                        <div style="flex: 1; min-width: 0;">
+                            <div class="track-name" style="font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${displayName}</div>
+                            <div class="track-info" style="font-size: 0.75rem; font-weight: 500; color: ${color};">${infoText}</div>
+                        </div>
+                     `;
+                    container.appendChild(item);
+                } else {
+                    // Update existing
+                    item.dataset.realTrackId = track.id; // Update real track ID tracking
+                    item.style.borderLeftColor = color;
+                    item.querySelector('.track-name').textContent = displayName;
+                    const infoEl = item.querySelector('.track-info');
+                    infoEl.textContent = infoText;
+                    infoEl.style.color = color;
+
+                    // Update photo only if changed type significantly or if we have a new photo
+                    const currentPhoto = item.querySelector('.photo-container');
+                    const hasImg = currentPhoto.querySelector('img');
+                    const newHasImg = photoHtml.includes('<img');
+
+                    if (hasImg !== newHasImg || (newHasImg && !currentPhoto.innerHTML.includes(face?.photo_base64?.substring(0, 20)))) {
+                        const parent = currentPhoto.parentNode;
+                        const temp = document.createElement('div');
+                        temp.innerHTML = photoHtml;
+                        parent.replaceChild(temp.firstElementChild, currentPhoto);
+                    }
+                }
+            });
+        }
+
+        async function loadData() {
+            try {
+                const response = await fetch(`${API_BASE}/faces`);
+                const data = await response.json();
+                allFacesData = data.faces || [];
+                const visitors = allFacesData.filter(f => f.status !== 'employee');
+                const employees = allFacesData.filter(f => f.status === 'employee');
+                document.getElementById('count-all').textContent = allFacesData.length;
+                document.getElementById('count-visitors').textContent = visitors.length;
+                document.getElementById('count-employees').textContent = employees.length;
+                updateActiveFacesCount();
+                updateAnalytics();
+                renderClients();
+                renderClients();
+                // updateActiveCameraVisitors(); // ❌ REMOVED: Managed by Tracks WebSocket
+            } catch (error) {
+                console.error('Error loading ', error);
+            }
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-nav').classList.toggle('active');
+        }
+
+        // 🔥 NEW: for mobile menu — closes after selection
+        function switchTabAndClose(tab) {
+            toggleMobileMenu(); // close first
+            switchTab(tab);     // then switch
+        }
+
+        function switchTab(tab) {
+            // Update Desktop Tabs
+            document.querySelectorAll('.nav-tab').forEach(t => {
+                t.classList.remove('active');
+                const label = t.innerText.toLowerCase();
+                if (tab === 'camera' && label.includes('камера')) {
+                    t.classList.add('active');
+                } else if (tab === 'clients' && label.includes('клиенты')) {
+                    t.classList.add('active');
+                } else if (tab === 'analytics' && label.includes('аналитика')) {
+                    t.classList.add('active');
+                } else if (tab === 'calendar' && label.includes('календарь')) {
+                    t.classList.add('active');
+                }
+            });
+
+            // Update Mobile Items
+            document.querySelectorAll('.mobile-nav-item').forEach(t => t.classList.remove('active'));
+
+            // Simple mapping
+            const map = { 'camera': 0, 'clients': 1, 'analytics': 2, 'calendar': 3 };
+            const mobItems = document.querySelectorAll('.mobile-nav-item');
+            if (mobItems[map[tab]]) mobItems[map[tab]].classList.add('active');
+
+            // Hide ALL sections
+            document.querySelectorAll('.section').forEach(s => {
+                s.classList.remove('active');
+            });
+
+            // Show Target
+            const target = document.getElementById('section-' + tab);
+            if (target) {
+                target.classList.add('active');
+            }
+
+            // Refresh stream logic
+            if (tab === 'camera') {
+                const img = document.getElementById('camera-image');
+                if (img && img.style.display !== 'none') {
+                    const src = img.getAttribute('src');
+                    if (src) {
+                        img.src = src.split('?')[0] + '?t=' + new Date().getTime();
+                    }
+                }
+            } else if (tab === 'analytics') {
+                updateAnalytics();
+            } else if (tab === 'calendar') {
+                loadCalendar();
+            }
+        }
+
+        function setQuickPeriod(type) {
+            const today = new Date();
+            let from = new Date(today);
+            switch (type) {
+                case 'today':
+                    break;
+                case 'week':
+                    from.setDate(from.getDate() - 7);
+                    break;
+                case 'month':
+                    from.setMonth(from.getMonth() - 1);
+                    break;
+            }
+            document.getElementById('date-from').value = formatDateInput(from);
+            document.getElementById('date-to').value = formatDateInput(today);
+            applyPeriod();
+        }
+
+        function applyPeriod() {
+            updateAnalytics();
+        }
+
+        function updateAnalytics() {
+            const fromStr = document.getElementById('date-from').value;
+            const toStr = document.getElementById('date-to').value;
+            if (!fromStr || !toStr) return;
+
+            const fromDate = new Date(fromStr);
+            fromDate.setHours(0, 0, 0, 0);
+            const toDate = new Date(toStr);
+            toDate.setHours(23, 59, 59, 999);
+
+            const visitors = allFacesData.filter(f => f.status !== 'employee');
+            const dailyStats = {};
+            const uniqueVisitors = new Set();
+            let totalMinutes = 0;
+
+            visitors.forEach(face => {
+                const visits = (face.visits || []).map(ts => new Date(ts));
+                const visitsInPeriod = visits.filter(v => v >= fromDate && v <= toDate);
+                if (visitsInPeriod.length > 0) {
+                    uniqueVisitors.add(face.id);
+                    const totalFaceSeconds = face.seconds_all || 0;
+                    const totalFaceVisits = visits.length;
+                    const periodSeconds = totalFaceVisits > 0 ? (totalFaceSeconds / totalFaceVisits) * visitsInPeriod.length : 0;
+                    const periodMinutes = periodSeconds / 60;
+                    totalMinutes += periodMinutes;
+
+                    visitsInPeriod.forEach(visitDate => {
+                        const dayKey = visitDate.toISOString().split('T')[0];
+                        if (!dailyStats[dayKey]) {
+                            dailyStats[dayKey] = {
+                                date: visitDate,
+                                visits: 0,
+                                uniqueVisitors: new Set(),
+                                minutes: 0
+                            };
+                        }
+                        dailyStats[dayKey].visits++;
+                        dailyStats[dayKey].uniqueVisitors.add(face.id);
+                        dailyStats[dayKey].minutes += periodMinutes / visitsInPeriod.length;
+                    });
+                }
+            });
+
+            const totalVisits = Object.values(dailyStats).reduce((sum, day) => sum + day.visits, 0);
+            const days = Math.max(1, Math.ceil((toDate - fromDate) / (1000 * 60 * 60 * 24)));
+            const avgPerDay = Math.round(totalVisits / days);
+
+            document.getElementById('stat-total').textContent = totalVisits;
+            document.getElementById('stat-unique').textContent = uniqueVisitors.size;
+            document.getElementById('stat-avg').textContent = avgPerDay;
+            document.getElementById('stat-minutes').textContent = Math.round(totalMinutes);
+
+            fetch(`${API_BASE}/analytics/total`)
+                .then(resp => resp.json())
+                .then(data => {
+                    document.getElementById('stat-unique-all').textContent = data.total_unique_visitors;
+                    document.getElementById('stat-total-all').textContent = data.total_visits;
+                })
+                .catch(() => {
+                    document.getElementById('stat-unique-all').textContent = '—';
+                    document.getElementById('stat-total-all').textContent = '—';
+                });
+
+            renderDailyStats(dailyStats);
+        }
+
+        function renderDailyStats(dailyStats) {
+            const container = document.getElementById('daily-stats');
+            const sortedDays = Object.values(dailyStats).sort((a, b) => b.date - a.date);
+
+            if (sortedDays.length === 0) {
+                container.innerHTML = `
+    <div class="empty-state">
+      <div class="empty-icon">📭</div>
+      <p>Нет данных за выбранный период</p>
+    </div>
+    `;
+                return;
+            }
+
+            let html = `
+  <table>
+    <thead>
+      <tr>
+        <th>Дата</th>
+        <th>День недели</th>
+        <th>Визитов</th>
+        <th>Уникальных</th>
+        <th>Минут</th>
+      </tr>
+    </thead>
+    <tbody>
+  `;
+
+            sortedDays.forEach(day => {
+                const dateStr = day.date.toLocaleDateString('ru-RU', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric'
+                });
+                const weekday = day.date.toLocaleDateString('ru-RU', { weekday: 'long' });
+
+                html += `
+    <tr>
+      <td><strong>${dateStr}</strong></td>
+      <td>${weekday}</td>
+      <td><strong>${day.visits}</strong></td>
+      <td>${day.uniqueVisitors.size}</td>
+      <td>${Math.round(day.minutes)}</td>
+    </tr>
+    `;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        function filterClients(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+            renderClients();
+        }
+
+        function parseLastSeen(last_seen_str) {
+            if (!last_seen_str) return new Date(0);
+            const date = new Date(last_seen_str);
+            return isNaN(date.getTime()) ? new Date(0) : date;
+        }
+
+        function updateActiveFacesCount() {
+            const now = new Date();
+            const tenSecondsAgo = new Date(now.getTime() - 5000);
+            const activeCount = allFacesData.filter(f => {
+                const lastSeen = parseLastSeen(f.last_seen);
+                return lastSeen >= tenSecondsAgo && f.status !== 'employee';
+            }).length;
+            document.getElementById('count-active').textContent = activeCount;
+        }
+
+        function renderClients() {
+            const container = document.getElementById('clients-table');
+            let faces = [...allFacesData];
+
+            if (currentFilter === 'visitors') {
+                faces = faces.filter(f => f.status !== 'employee');
+            } else if (currentFilter === 'employees') {
+                faces = faces.filter(f => f.status === 'employee');
+            } else if (currentFilter === 'active') {
+                const now = new Date();
+                const tenSecondsAgo = new Date(now.getTime() - 10000);
+                faces = faces.filter(f => {
+                    const lastSeen = parseLastSeen(f.last_seen);
+                    return lastSeen >= tenSecondsAgo && f.status !== 'employee';
+                });
+            }
+
+            if (faces.length === 0) {
+                container.innerHTML = `
+    <div class="empty-state">
+      <div class="empty-icon">📭</div>
+      <p>Нет данных</p>
+    </div>
+    `;
+                return;
+            }
+
+            let html = `
+  <table>
+    <thead>
+      <tr>
+        <th>Фото</th>
+        <th>Имя</th>
+        <th>Статус</th>
+        <th>Всего визитов</th>
+        <th>За месяц</th>
+        <th>За неделю</th>
+        <th>Всего минут</th>
+        <th>Последний визит</th>
+        <th>Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+  `;
+
+            faces.forEach(face => {
+                const displayName = getDisplayName(face);
+                const statusBadge = face.status === 'employee'
+                    ? '<span class="badge employee">🔒 Сотрудник</span>'
+                    : face.status === 'known'
+                        ? '<span class="badge known">✓ Известен</span>'
+                        : '<span class="badge new">🆕 Новый</span>';
+
+                const photoCell = face.photo_base64 && face.photo_base64.length > 100
+                    ? `<img class="photo" src="data:image/jpeg;base64,${face.photo_base64}" alt="Фото">`
+                    : `<div class="photo-placeholder">${face.status === 'employee' ? '👔' : '👤'}</div>`;
+
+                const totalVisits = (face.visits || []).length || (face.visits_all || 0);
+                const totalSeconds = face.seconds_all || 0;
+                const totalMinutes = Math.round(totalSeconds / 60);
+                const lastVisit = formatDateTime(face.last_seen);
+
+                html += `
+    <tr onclick="openClientModal(${face.id})" style="cursor: pointer;">
+      <td>${photoCell}</td>
+      <td><strong>${displayName}</strong><br><small style="color: var(--text-muted);">#${face.id}</small></td>
+      <td>${statusBadge}</td>
+      <td><strong>${totalVisits}</strong></td>
+      <td>${face.visits_month || 0}</td>
+      <td>${face.visits_week || 0}</td>
+      <td>${totalMinutes} мин</td>
+      <td>${lastVisit}</td>
+      <td onclick="event.stopPropagation()">
+        <div class="actions-cell">
+          ${face.status !== 'employee'
+                        ? `<button class="btn btn-success btn-sm" onclick="markAsEmployee(${face.id})">🔒</button>`
+                        : `<button class="btn btn-primary btn-sm" onclick="markAsVisitor(${face.id})">👤</button>`
+                    }
+          <button class="btn btn-danger btn-sm" onclick="deleteFace(${face.id})">🗑️</button>
+        </div>
+      </td>
+    </tr>
+    `;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        function openClientModal(clientId) {
+            const client = allFacesData.find(f => f.id === clientId);
+            if (!client) return;
+
+            currentClientId = clientId;
+            const displayName = getDisplayName(client);
+            document.getElementById('modal-title').textContent = `${displayName} (#${client.id})`;
+            document.getElementById('modal-name-input').value = client.name || '';
+
+            const primaryPhotoContainer = document.getElementById('modal-primary-photo');
+            if (client.photo_base64 && client.photo_base64.length > 100) {
+                primaryPhotoContainer.innerHTML = `
+      <img src="data:image/jpeg;base64,${client.photo_base64}"
+           style="width: 160px; height: 160px; border-radius: 18px; object-fit: cover; border: 3px solid var(--accent); box-shadow: 0 6px 20px rgba(0,0,0,0.2);">
+    `;
+            } else {
+                primaryPhotoContainer.innerHTML = `
+      <div class="photo-placeholder" style="width: 160px; height: 160px; font-size: 3.2rem;">👤</div>
+    `;
+            }
+
+            loadAdditionalPhotos(clientId);
+
+            const visits = (client.visits || []).map(ts => new Date(ts)).sort((a, b) => b - a);
+            const now = new Date();
+            const weekAgo = new Date(now);
+            weekAgo.setDate(now.getDate() - 7);
+            const monthAgo = new Date(now);
+            monthAgo.setMonth(now.getMonth() - 1);
+
+            const visitsWeek = visits.filter(v => v >= weekAgo).length;
+            const visitsMonth = visits.filter(v => v >= monthAgo).length;
+            const totalSeconds = client.seconds_all || 0;
+            const totalMinutes = Math.round(totalSeconds / 60);
+
+            document.getElementById('modal-visits-total').textContent = visits.length || client.visits_all || 0;
+            document.getElementById('modal-visits-month').textContent = visitsMonth;
+            document.getElementById('modal-visits-week').textContent = visitsWeek;
+            document.getElementById('modal-minutes-total').textContent = totalMinutes;
+
+            const visitsByDay = {};
+            visits.forEach(visitDate => {
+                const dayKey = visitDate.toISOString().split('T')[0];
+                if (!visitsByDay[dayKey]) {
+                    visitsByDay[dayKey] = {
+                        date: visitDate,
+                        count: 0,
+                        minutes: 0
+                    };
+                }
+                visitsByDay[dayKey].count++;
+                visitsByDay[dayKey].minutes = Math.round(totalMinutes / (Object.keys(visitsByDay).length || 1));
+            });
+
+            const sortedDays = Object.values(visitsByDay).sort((a, b) => b.date - a.date);
+            let html = '';
+            sortedDays.slice(0, 30).forEach(day => {
+                const dateStr = day.date.toLocaleDateString('ru-RU', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric'
+                });
+                const weekday = day.date.toLocaleDateString('ru-RU', { weekday: 'long' });
+                html += `
+    <div class="visit-item">
+      <div>
+        <div class="visit-date">${dateStr}</div>
+        <div class="visit-time">${weekday}</div>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <span style="color: var(--text-muted); font-size: 0.875rem;">${day.count} визитов</span>
+        <span class="visit-duration">${day.minutes} мин</span>
+      </div>
+    </div>
+    `;
+            });
+
+            if (!html) {
+                html = `<div class="empty-state"><div class="empty-icon">📭</div><p>Нет визитов</p></div>`;
+            }
+
+            document.getElementById('visit-list').innerHTML = html;
+            document.getElementById('client-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('client-modal').classList.remove('active');
+        }
+
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+
+        function updateMonthTitle() {
+            document.getElementById('calendar-month-title').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+        }
+
+        function prevMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            updateMonthTitle();
+            loadCalendar();
+        }
+
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            updateMonthTitle();
+            loadCalendar();
+        }
+
+        function goToToday() {
+            const today = new Date();
+            currentMonth = today.getMonth();
+            currentYear = today.getFullYear();
+            updateMonthTitle();
+            loadCalendar();
+        }
+
+        async function loadCalendar() {
+            const container = document.getElementById('calendar-grid');
+            container.innerHTML = `
+  <div class="calendar-loading">
+    <div style="width: 24px; height: 24px; border: 2px solid var(--border); border-top: 2px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 0.5rem;"></div>
+    Загрузка...
+  </div>
+  `;
+
+            try {
+                const response = await fetch(`${API_BASE}/calendar_stats?year=${currentYear}&month=${currentMonth + 1}`);
+                const data = await response.json();
+
+                const firstDay = new Date(currentYear, currentMonth, 1);
+                const lastDay = new Date(currentYear, currentMonth + 1, 0);
+                const daysInMonth = lastDay.getDate();
+                const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+
+                const today = new Date();
+                const isCurrentMonth = today.getMonth() === currentMonth && today.getFullYear() === currentYear;
+
+                let html = '';
+
+                // Empty cells before 1st
+                for (let i = 0; i < startDay; i++) {
+                    html += `<div class="calendar-day empty"></div>`;
+                }
+
+                // Days
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayData = data.days && data.days[day];
+                    const visitors = dayData ? dayData.unique_visitors : 0;
+                    const visits = dayData ? dayData.total_sessions : 0;
+                    const hasVisits = visitors > 0;
+                    const isToday = isCurrentMonth && day === today.getDate();
+                    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+                    let dayClass = 'calendar-day';
+                    if (hasVisits) dayClass += ' has-data';
+                    if (isToday) dayClass += ' today';
+
+                    html += `
+      <div class="${dayClass}"
+           onclick="openDayModal('${dateStr}')"
+           title="${hasVisits ? `${visitors} посетителей, ${visits} визитов` : 'Нет посещений'}">
+        <div class="day-number">${day}</div>
+        ${hasVisits ? `
+        <div class="day-stats">
+          <div class="visitor-count">
+            <span>👤</span> ${visitors}
+          </div>
+          <div class="visit-count">
+            ${visits} визитов
+          </div>
+        </div>
+        ` : ''}
+      </div>
+      `;
+                }
+
+                // Empty cells after last day
+                const totalCells = 42;
+                const filledCells = startDay + daysInMonth;
+                for (let i = filledCells; i < totalCells; i++) {
+                    html += `<div class="calendar-day empty"></div>`;
+                }
+
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading calendar:', error);
+                container.innerHTML = `
+    <div class="calendar-loading" style="color: var(--danger);">
+      ❌ Ошибка загрузки
+    </div>
+    `;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            updateMonthTitle();
+            loadCalendar();
+        });
+
+        async function openDayModal(dateStr) {
+            const [year, month, day] = dateStr.split('-').map(Number);
+            const date = new Date(year, month - 1, day);
+            const dateFormatted = date.toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            });
+
+            document.getElementById('day-modal-title').textContent = `Посещения за ${dateFormatted}`;
+            document.getElementById('day-visitors-list').innerHTML = '<div class="loading"><div class="spinner"></div>Загрузка списка посетителей...</div>';
+
+            try {
+                const statsResponse = await fetch(`${API_BASE}/calendar_stats?year=${year}&month=${month}`);
+                const statsData = await statsResponse.json();
+                const dayData = statsData.days[day];
+
+                const totalSeconds = dayData ? dayData.total_seconds : 0;
+                const totalMinutes = Math.round(totalSeconds / 60);
+                const visitors = dayData ? dayData.unique_visitors : 0;
+                const totalVisits = dayData ? dayData.total_sessions : 0;
+
+                document.getElementById('day-visitors').textContent = visitors;
+                document.getElementById('day-visits').textContent = totalVisits;
+                document.getElementById('day-minutes').textContent = totalMinutes;
+
+                const dayVisitors = await getDayVisitors(dateStr);
+
+                if (dayVisitors.length === 0) {
+                    document.getElementById('day-visitors-list').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <p>Нет посетителей за этот день</p>
+      </div>
+      `;
+                } else {
+                    let html = '<div class="visit-list">';
+                    dayVisitors.forEach(visitor => {
+                        const visitTime = visitor.first_visit ? new Date(visitor.first_visit).toLocaleTimeString('ru-RU', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        }) : '—';
+                        const duration = visitor.duration_minutes ? `${visitor.duration_minutes} мин` : '—';
+                        const visitsCount = visitor.visits_count || 1;
+
+                        html += `
+        <div class="day-visitor-item">
+          <div class="day-visitor-info">
+            ${visitor.photo_base64 && visitor.photo_base64.length > 100
+                                ? `<img class="day-visitor-photo" src="data:image/jpeg;base64,${visitor.photo_base64}" alt="Фото">`
+                                : `<div class="photo-placeholder" style="width: 40px; height: 40px;">👤</div>`
+                            }
+            <div class="day-visitor-details">
+              <div class="day-visitor-name">Посетитель #${visitor.person_id || visitor.face_id}</div>
+              <div class="day-visitor-time">Первое посещение: ${visitTime}</div>
+            </div>
+          </div>
+          <div class="day-visitor-stats">
+            <span class="day-visitor-count">${visitsCount} ${visitsCount === 1 ? 'визит' : 'визита'}</span>
+            <span class="visit-duration">${duration}</span>
+          </div>
+        </div>
+        `;
+                    });
+                    html += '</div>';
+                    document.getElementById('day-visitors-list').innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Error loading day details:', error);
+                document.getElementById('day-visitors-list').innerHTML = `
+    <div class="empty-state">
+      <div class="empty-icon">❌</div>
+      <p>Ошибка загрузки данных</p>
+    </div>
+    `;
+            }
+
+            document.getElementById('day-modal').classList.add('active');
+        }
+
+        async function getDayVisitors(dateStr) {
+            try {
+                const response = await fetch(`${API_BASE}/faces`);
+                const data = await response.json();
+
+                const targetDate = new Date(dateStr);
+                targetDate.setHours(0, 0, 0, 0);
+                const nextDate = new Date(targetDate);
+                nextDate.setDate(nextDate.getDate() + 1);
+
+                const dayVisitors = [];
+                data.faces.forEach(face => {
+                    if (face.status === 'employee') return;
+
+                    const visits = (face.visits || [])
+                        .map(ts => new Date(ts))
+                        .filter(visitDate => visitDate >= targetDate && visitDate < nextDate)
+                        .sort((a, b) => a - b);
+
+                    if (visits.length > 0) {
+                        const firstVisit = visits[0];
+                        const lastVisit = visits[visits.length - 1];
+                        const durationMs = lastVisit - firstVisit;
+                        const durationMinutes = Math.max(1, Math.round(durationMs / (1000 * 60)));
+
+                        dayVisitors.push({
+                            face_id: face.id,
+                            person_id: face.person_id,
+                            photo_base64: face.photo_base64,
+                            first_visit: firstVisit.toISOString(),
+                            last_visit: lastVisit.toISOString(),
+                            visits_count: visits.length,
+                            duration_minutes: durationMinutes
+                        });
+                    }
+                });
+
+                return dayVisitors.sort((a, b) => new Date(a.first_visit) - new Date(b.first_visit));
+            } catch (error) {
+                console.error('Error getting day visitors:', error);
+                return [];
+            }
+        }
+
+        function closeDayModal() {
+            document.getElementById('day-modal').classList.remove('active');
+        }
+
+        async function markAsEmployee(faceId) {
+            if (!confirm('⚠️ Пометить как сотрудника?\nЭтот человек не будет учитываться в статистике.')) {
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE}/faces/${faceId}/status?status=employee`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    await loadData();
+                } else {
+                    alert('❌ Ошибка при обновлении статуса');
+                }
+            } catch (error) {
+                alert('❌ Ошибка: ' + error.message);
+            }
+        }
+
+        async function markAsVisitor(faceId) {
+            try {
+                const response = await fetch(`${API_BASE}/faces/${faceId}/status?status=known`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    await loadData();
+                } else {
+                    alert('❌ Ошибка при обновлении статуса');
+                }
+            } catch (error) {
+                alert('❌ Ошибка: ' + error.message);
+            }
+        }
+
+        async function deleteFace(faceId) {
+            if (!confirm('🗑️ Удалить эту запись?\nДействие нельзя отменить!')) {
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE}/faces/${faceId}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    await loadData();
+                } else {
+                    alert('❌ Ошибка при удалении');
+                }
+            } catch (error) {
+                alert('❌ Ошибка: ' + error.message);
+            }
+        }
+
+        function formatDateTime(isoString) {
+            if (!isoString) return '—';
+            const date = new Date(isoString);
+            if (isNaN(date.getTime())) return '—';
+
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+
+            if (diff < 60) return 'только что';
+            if (diff < 3600) return `${Math.floor(diff / 60)} мин назад`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)} ч назад`;
+            if (diff < 172800) return 'вчера';
+            return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        document.getElementById('client-modal').addEventListener('click', function (e) {
+            if (e.target === this) closeModal();
+        });
+
+        document.getElementById('day-modal').addEventListener('click', function (e) {
+            if (e.target === this) closeDayModal();
+        });
+
+        let _lastVisiblePersonIds = new Set();
+
+        async function updateActiveCameraVisitors() {
+            try {
+                const response = await fetch(`${API_BASE}/currently_visible`);
+                const data = await response.json();
+                const activePeople = data.currently_visible || [];
+
+                document.getElementById('active-count').textContent = activePeople.length;
+
+                const facesMap = {};
+                allFacesData.forEach(f => facesMap[f.person_id] = f);
+
+                const recognized = activePeople.filter(p => {
+                    const face = facesMap[p.person_id];
+                    return face && (face.status === 'known' || face.status === 'employee' || (face.name && face.name.trim()));
+                });
+
+                const unrecognized = activePeople.filter(p => {
+                    const face = facesMap[p.person_id];
+                    return !face || (face.status === 'new' && (!face.name || !face.name.trim()));
+                });
+
+                document.getElementById('recognized-count').textContent = recognized.length;
+                document.getElementById('unrecognized-count').textContent = unrecognized.length;
+
+                const container = document.getElementById('active-visitors-list');
+                const loader = container.querySelector('.loading');
+                if (loader) loader.remove();
+
+                if (activePeople.length === 0) {
+                    if (!container.querySelector('.empty-state-active')) {
+                        container.innerHTML = `
+        <div class="empty-state-active" style="text-align: center; color: var(--text-muted); padding: 2.5rem 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1;">
+          <div style="font-size: 2.8rem; margin-bottom: 0.8rem; opacity: 0.4;">👀</div>
+          <div style="font-size: 0.95rem;">Никого в кадре</div>
+        </div>
+        `;
+                    }
+                    _lastVisiblePersonIds.clear();
+                    return;
+                }
+
+                const currentPersonIds = new Set(activePeople.map(p => p.person_id));
+
+                // Remove vanished
+                container.querySelectorAll('[data-person-id]').forEach(el => {
+                    const pid = parseInt(el.getAttribute('data-person-id'), 10);
+                    if (!currentPersonIds.has(pid)) {
+                        el.style.opacity = '0';
+                        el.style.transform = 'translateX(20px)';
+                        setTimeout(() => {
+                            if (el.parentNode) el.remove();
+                        }, 200);
+                    }
+                });
+
+                const emptyState = container.querySelector('.empty-state-active');
+                if (emptyState) emptyState.remove();
+
+                activePeople.forEach((person, index) => {
+                    const face = facesMap[person.person_id] || {};
+                    const displayName = person.display_name || face.name || `Client ${person.person_id}`;
+                    const isEmployee = face.status === 'employee';
+                    const isRecognized = face.status === 'known' || isEmployee || (face.name && face.name.trim());
+                    const badgeColor = isEmployee ? '#10b981' : isRecognized ? '#0ea5e9' : '#ef4444';
+                    const badgeText = isEmployee ? '🔒 Сотрудник' : isRecognized ? '👤 Посетитель' : '❓ Неизвестно';
+                    const visitCount = face.visits_all || face.visits?.length || 0;
+
+                    let existingEl = container.querySelector(`[data-person-id="${person.person_id}"]`);
+                    if (existingEl) {
+                        existingEl.style.opacity = '1';
+                        existingEl.style.transform = 'translateX(0)';
+
+                        const nameEl = existingEl.querySelector('.visitor-name');
+                        if (nameEl && nameEl.textContent !== displayName) nameEl.textContent = displayName;
+
+                        const badgeEl = existingEl.querySelector('.visitor-badge');
+                        const newBadgeContent = isEmployee ? '👔' : `${visitCount} визитов`;
+                        if (badgeEl && badgeEl.textContent.trim() !== newBadgeContent) badgeEl.textContent = newBadgeContent;
+
+                        if (existingEl.style.borderLeftColor !== badgeColor) {
+                            existingEl.style.borderLeftColor = badgeColor;
+                            const subText = existingEl.querySelector('.visitor-subtext');
+                            if (subText) {
+                                subText.style.color = badgeColor;
+                                subText.textContent = badgeText;
+                            }
+                        }
+                    } else {
+                        const photoHtml = face.photo_base64 && face.photo_base64.length > 100
+                            ? `<img src="data:image/jpeg;base64,${face.photo_base64}" style="width: 48px; height: 48px; border-radius: 12px; object-fit: cover; border: 2px solid ${badgeColor}; flex-shrink: 0;">`
+                            : `<div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #334155, #1e293b); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 1.4rem; flex-shrink: 0;">${isEmployee ? '👔' : isRecognized ? '👤' : '❓'}</div>`;
+
+                        const itemDiv = document.createElement('div');
+                        itemDiv.setAttribute('data-person-id', person.person_id);
+                        itemDiv.style.cssText = `
+          padding: 0.85rem;
+          background: var(--bg-surface);
+          border-radius: 14px;
+          border-left: 4px solid ${badgeColor};
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+          opacity: 0;
+          transform: translateX(-20px);
+          transition: opacity 0.3s, transform 0.3s;
+          margin-bottom: 0.75rem;
+        `;
+
+                        itemDiv.innerHTML = `
+          ${photoHtml}
+          <div style="flex: 1; min-width: 0;">
+            <div class="visitor-name" style="font-weight: 700; color: var(--text-primary); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              ${displayName}
+            </div>
+            <div class="visitor-subtext" style="color: ${badgeColor}; font-size: 0.75rem; font-weight: 600; margin-top: 0.25rem;">
+              ${badgeText}
+            </div>
+          </div>
+          <div class="visitor-badge" style="
+            background: ${badgeColor};
+            color: white;
+            padding: 0.35rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
+          ">
+            ${isEmployee ? '👔' : `${visitCount} визитов`}
+          </div>
+        `;
+
+                        container.appendChild(itemDiv);
+
+                        requestAnimationFrame(() => {
+                            itemDiv.style.opacity = '1';
+                            itemDiv.style.transform = 'translateX(0)';
+                        });
+                    }
+                });
+
+                _lastVisiblePersonIds = currentPersonIds;
+            } catch (error) {
+                console.error('Error updating active visitors:', error);
+            }
+        }
+
+        // Ensure animation keyframes exist
+        if (!document.getElementById('camera-animation-style')) {
+            const style = document.createElement('style');
+            style.id = 'camera-animation-style';
+            style.textContent = `
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+  `;
+            document.head.appendChild(style);
+        }
+
+        function getDisplayName(face) {
+            if (face.name && face.name.trim()) {
+                return face.name;
+            }
+            if (face.status === 'employee') {
+                const employees = allFacesData
+                    .filter(f => f.status === 'employee')
+                    .sort((a, b) => a.id - b.id);
+                const index = employees.findIndex(f => f.id === face.id);
+                return `Employee ${index + 1}`;
+            } else {
+                const clients = allFacesData
+                    .filter(f => f.status !== 'employee')
+                    .sort((a, b) => a.id - b.id);
+                const index = clients.findIndex(f => f.id === face.id);
+                return `Client ${index + 1}`;
+            }
+        }
+
+        let currentClientId = null;
+
+        async function loadAdditionalPhotos(faceId) {
+            const container = document.getElementById('modal-additional-photos');
+            container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2.2rem;">Загрузка...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/faces/${faceId}/photos`);
+                const data = await response.json();
+
+                if (!data.additional_photos || data.additional_photos.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2.2rem;">Нет дополнительных фотографий</div>';
+                    return;
+                }
+
+                let html = '';
+                data.additional_photos.forEach(photo => {
+                    const angleName = getAngleName(photo.angle);
+                    const angleEmoji = getAngleEmoji(photo.angle);
+                    html += `
+        <div style="position: relative; border: 2px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--bg-card);">
+          <img src="data:image/jpeg;base64,${photo.photo_base64}"
+               style="width: 100%; height: 130px; object-fit: cover;">
+          <div style="padding: 0.55rem; text-align: center; background: var(--bg-surface);">
+            <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary);">
+              ${angleEmoji} ${angleName}
+            </div>
+          </div>
+          <button onclick="deletePhoto(${faceId}, ${photo.id})"
+                  style="position: absolute; top: 0.3rem; right: 0.3rem; width: 26px; height: 26px; border: none; background: rgba(239, 68, 68, 0.9); color: white; border-radius: 8px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; justify-content: center;">
+            ✕
+          </button>
+        </div>
+      `;
+                });
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading additional photos:', error);
+                container.innerHTML = '<div style="text-align: center; color: var(--danger); padding: 2.2rem;">❌ Ошибка загрузки</div>';
+            }
+        }
+
+        function getAngleName(angle) {
+            const angleMap = {
+                'frontal': 'Спереди',
+                'left_profile': 'Левый профиль',
+                'right_profile': 'Правый профиль',
+                'looking_up': 'Голова вверх',
+                'looking_down': 'Голова вниз',
+                'back': 'Сзади',
+                'tilted': 'Наклон головы',
+                'unknown': 'Неизвестно'
+            };
+            return angleMap[angle] || angle;
+        }
+
+        function getAngleEmoji(angle) {
+            const emojiMap = {
+                'frontal': '😊',
+                'left_profile': '👈',
+                'right_profile': '👉',
+                'looking_up': '⬆️',
+                'looking_down': '⬇️',
+                'back': '🔙',
+                'tilted': '↩️',
+                'unknown': '❓'
+            };
+            return emojiMap[angle] || '📷';
+        }
+
+        async function uploadPhoto() {
+            const fileInput = document.getElementById('photo-upload');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            if (!currentClientId) {
+                alert('❌ Ошибка: клиент не выбран');
+                return;
+            }
+
+            const container = document.getElementById('modal-additional-photos');
+            const originalHtml = container.innerHTML;
+            container.innerHTML = '<div style="text-align: center; color: var(--accent); padding: 2.2rem;"><div class="spinner"></div>Загрузка фотографии...</div>';
+
+            try {
+                const base64 = await fileToBase64(file);
+                const base64Data = base64.split(',')[1];
+
+                const response = await fetch(`${API_BASE}/faces/${currentClientId}/photos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ photo_base64: base64Data })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    const angleName = getAngleName(result.angle);
+                    alert(`✅ Фотография добавлена!\nРакурс: ${angleName}`);
+                    await loadAdditionalPhotos(currentClientId);
+                    await loadData();
+                } else {
+                    const error = await response.json();
+                    alert(`❌ Ошибка: ${error.detail || 'Не удалось загрузить фотографию'}`);
+                    container.innerHTML = originalHtml;
+                }
+            } catch (error) {
+                console.error('Error uploading photo:', error);
+                alert('❌ Ошибка при загрузке фотографии');
+                container.innerHTML = originalHtml;
+            }
+
+            fileInput.value = '';
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function deletePhoto(faceId, photoId) {
+            if (!confirm('🗑️ Удалить эту фотографию?')) {
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE}/faces/${faceId}/photos/${photoId}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    alert('✅ Фотография удалена');
+                    await loadAdditionalPhotos(faceId);
+                    await loadData();
+                } else {
+                    alert('❌ Ошибка при удалении фотографии');
+                }
+            } catch (error) {
+                console.error('Error deleting photo:', error);
+                alert('❌ Ошибка при удалении фотографии');
+            }
+        }
+
+        async function saveClientName() {
+            if (!currentClientId) return;
+            const nameInput = document.getElementById('modal-name-input');
+            const newName = nameInput.value.trim();
+
+            try {
+                const response = await fetch(`${API_BASE}/faces/${currentClientId}/name`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: newName })
+                });
+
+                if (response.ok) {
+                    alert('✅ Имя сохранено');
+                    await loadData();
+                    const client = allFacesData.find(f => f.id === currentClientId);
+                    if (client) {
+                        client.name = newName;
+                        const displayName = getDisplayName(client);
+                        document.getElementById('modal-title').textContent = `${displayName} (#${client.id})`;
+                    }
+                } else {
+                    alert('❌ Ошибка при сохранении имени');
+                }
+            } catch (error) {
+                console.error('Error saving name:', error);
+                alert('❌ Ошибка при сохранении имени');
+            }
+        }
+
+        function openAddClientModal() {
+            document.getElementById('add-client-modal').classList.add('active');
+            document.getElementById('add-client-form').reset();
+            document.getElementById('add-client-status').textContent = '';
+        }
+
+        function closeAddClientModal() {
+            document.getElementById('add-client-modal').classList.remove('active');
+        }
+
+        document.getElementById('add-client-modal').addEventListener('click', function (e) {
+            if (e.target === this) closeAddClientModal();
+        });
+
+        async function submitAddClient(event) {
+            event.preventDefault();
+            const name = document.getElementById('add-client-name').value.trim();
+            const fileInput = document.getElementById('add-client-photo');
+            const file = fileInput.files[0];
+            const statusDiv = document.getElementById('add-client-status');
+
+            if (!name || !file) {
+                statusDiv.textContent = 'Пожалуйста, заполните все поля.';
+                return;
+            }
+
+            statusDiv.textContent = 'Загрузка...';
+
+            try {
+                const base64 = await fileToBase64(file);
+                const base64Data = base64.split(',')[1];
+
+                const response = await fetch(`${API_BASE}/faces/manual_create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name, photo_base64: base64Data })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    statusDiv.style.color = '#10b981';
+                    statusDiv.textContent = '✅ Клиент успешно добавлен!';
+                    await loadData();
+                    setTimeout(() => {
+                        closeAddClientModal();
+                    }, 1000);
+                } else {
+                    statusDiv.style.color = '#ef4444';
+                    statusDiv.textContent = '❌ Ошибка: ' + (result.detail || 'Не удалось добавить клиента');
+                }
+            } catch (error) {
+                statusDiv.style.color = '#ef4444';
+                statusDiv.textContent = '❌ Ошибка при добавлении клиента';
+            }
+        }
+
+        // 🔥 Init on DOMContentLoaded
+        window.addEventListener('DOMContentLoaded', function () {
+            init();
+            setupCameraStreamAndOverlay();
+            setupRectDrawing();
+
+            // Adjust mobile-nav top dynamically (for all viewport changes)
+            function adjustMobileNavTop() {
+                if (window.innerWidth <= 768) {
+                    const header = document.querySelector('.header');
+                    if (header) {
+                        const headerHeight = header.offsetHeight;
+                        document.getElementById('mobile-nav').style.top = headerHeight + 'px';
+                    }
+                }
+            }
+            window.addEventListener('resize', adjustMobileNavTop);
+            adjustMobileNavTop();
+        });
+
+        // Remaining functions unchanged
+        function setupCameraStreamAndOverlay() {
+            if (!window.Hls) {
+                const script = document.createElement('script');
+                script.src = "https://cdn.jsdelivr.net/npm/hls.js@latest";
+                script.onload = setupCameraStreamAndOverlay;
+                document.head.appendChild(script);
+                return;
+            }
+
+            const video = document.getElementById('camera-stream');
+            video.crossOrigin = "anonymous";
+            const image = document.getElementById('camera-image');
+            const canvas = document.getElementById('camera-overlay');
+            const ctx = canvas.getContext('2d');
+
+            let currentQuality = localStorage.getItem('video-quality') || 'SD';
+            document.getElementById('video-quality').value = currentQuality;
+
+            const loadingOverlay = document.getElementById('video-loading');
+            let hlsInstance = null; // ✅ Track HLS instance properly
+            let loadingTimeout = null;
+
+            function loadStream(quality) {
+                // Always declare video, image, and statusSpan at the top
+                const video = document.getElementById('camera-stream');
+                const image = document.getElementById('camera-image');
+                const statusSpan = document.getElementById('quality-status');
+                // ✅ WebRTC Handling - skip everything if source is webrtc or external_webrtc
+                const source = document.getElementById('camera-source').value;
+                if (source === 'webrtc') {
+                    if (loadingOverlay) loadingOverlay.style.display = 'none';
+                    if (statusSpan) statusSpan.textContent = '';
+                    console.log('Skipping loadStream for WebRTC source');
+                    return;
+                }
+                if (source === 'external_webrtc') {
+                    // MJPEG from external URL (TailScale)
+                    if (video) {
+                        video.style.display = 'none';
+                        video.removeAttribute('src');
+                    }
+                    if (image) {
+                        image.style.display = 'block';
+                        image.onload = () => {
+                            if (loadingOverlay) loadingOverlay.style.display = 'none';
+                            if (statusSpan) statusSpan.textContent = `✅ External MJPEG`;
+                            resizeCanvas();
+                        };
+                        image.onerror = () => {
+                            if (loadingOverlay) loadingOverlay.style.display = 'none';
+                            if (statusSpan) statusSpan.textContent = '⚠️ Ошибка External MJPEG';
+                        };
+                        // Укажите здесь внешний URL MJPEG-потока
+                        image.src = 'https://desktop-1vok6pj.tailb160c2.ts.net/pages/player/webrtc/camera1/0';
+                    }
+                    return;
+                }
+
+                // ✅ Clear any existing timeout
+                if (loadingTimeout) {
+                    clearTimeout(loadingTimeout);
+                    loadingTimeout = null;
+                }
+
+                // ✅ Destroy existing HLS instance
+                if (hlsInstance) {
+                    try {
+                        hlsInstance.destroy();
+                        console.log('Destroyed previous HLS instance');
+                    } catch (e) {
+                        console.warn('Error destroying HLS:', e);
+                    }
+                    hlsInstance = null;
+                }
+
+                // ✅ Stop video/image streams when switching
+                // (video, image already declared at top of function)
+
+                // Stop video stream
+                if (video && video.srcObject) {
+                    video.srcObject.getTracks().forEach(track => track.stop());
+                    video.srcObject = null;
+                }
+                if (video) video.removeAttribute('src');
+
+                // Stop MJPEG stream
+                if (image) image.src = '';
+                // ✅ Stop video/image streams when switching
+                // (video, image already declared at top of function)
+
+                // Stop video stream
+                if (video && video.srcObject) {
+                    video.srcObject.getTracks().forEach(track => track.stop());
+                    video.srcObject = null;
+                }
+                if (video) video.removeAttribute('src');
+
+                // Stop MJPEG stream
+                if (image) image.src = '';
+
+                if (loadingOverlay) loadingOverlay.style.display = 'flex';
+                if (statusSpan) statusSpan.textContent = `Загрузка ${quality}...`;
+
+                // ✅ Timeout fallback - hide loading after 10s
+                loadingTimeout = setTimeout(() => {
+                    if (loadingOverlay) loadingOverlay.style.display = 'none';
+                    if (statusSpan) statusSpan.textContent = 'Таймаут загрузки';
+                    console.warn('Stream load timeout');
+                }, 10000);
+
+                fetch(`${API_BASE}/camera_hls_url?quality=${quality}`)
+                    .then(resp => resp.json())
+                    .then(data => {
+                        if (loadingTimeout) clearTimeout(loadingTimeout);
+
+                        if (data.use_mjpeg) {
+                            // MJPEG mode
+                            video.style.display = 'none';
+                            video.removeAttribute('src');
+                            image.style.display = 'block';
+                            image.onload = () => {
+                                if (loadingOverlay) loadingOverlay.style.display = 'none';
+                                if (statusSpan) statusSpan.textContent = `✅ ${quality} (MJPEG)`;
+                                resizeCanvas();
+                            };
+                            image.onerror = () => {
+                                if (loadingOverlay) loadingOverlay.style.display = 'none';
+                                if (statusSpan) statusSpan.textContent = '⚠️ Ошибка MJPEG';
+                            };
+                            image.src = `${API_BASE}/video_feed?t=${Date.now()}`;
+                            return;
+                        }
+
+                        image.style.display = 'none';
+                        image.src = '';
+                        video.style.display = 'block';
+
+                        if (!data.success || !data.url) {
+                            console.error("Failed to get stream URL");
+                            if (loadingOverlay) loadingOverlay.style.display = 'none';
+                            if (statusSpan) statusSpan.textContent = 'Ошибка';
+                            return;
+                        }
+
+                        const hlsUrl = data.url.startsWith('http') ? data.url :
+                            (data.url.startsWith('/') ? `${API_BASE}${data.url}` : data.url);
+                        console.log(`Loading ${quality} stream: ${hlsUrl}`);
+
+                        if (window.Hls && window.Hls.isSupported && window.Hls.isSupported()) {
+                            hlsInstance = new window.Hls({
+                                enableWorker: true,
+                                lowLatencyMode: true,
+                                backBufferLength: 10,          // ✅ FIX: was 90s — keep only 10s of backbuffer
+                                maxBufferLength: 15,           // Max forward buffer in seconds
+                                maxMaxBufferLength: 20,        // Hard ceiling on buffer
+                                liveSyncDurationCount: 2,      // Stay close to live edge (2 segments)
+                                liveMaxLatencyDurationCount: 5 // Force sync if > 5 segments behind
+                            });
+                            hlsInstance.loadSource(hlsUrl);
+                            hlsInstance.attachMedia(video);
+                            hlsInstance.on(window.Hls.Events.MANIFEST_PARSED, function () {
+                                video.play().catch(e => console.log("Autoplay blocked/failed", e));
+                                if (loadingOverlay) loadingOverlay.style.display = 'none';
+                                if (statusSpan) statusSpan.textContent = `✅ ${quality}`;
+                            });
+                            hlsInstance.on(window.Hls.Events.ERROR, function (event, errData) {
+                                console.warn("HLS Error:", errData.type, errData.details, errData.fatal);
+                                if (errData.fatal) {
+                                    if (statusSpan) statusSpan.textContent = `⚠️ Ошибка ${quality} — повтор...`;
+                                    if (hlsInstance) {
+                                        hlsInstance.destroy();
+                                        hlsInstance = null;
+                                    }
+                                    // Auto-retry: ffmpeg may not have started yet
+                                    let retryCount = parseInt(video.dataset.hlsRetry || '0', 10);
+                                    if (retryCount < 20) {
+                                        video.dataset.hlsRetry = retryCount + 1;
+                                        console.log(`HLS retry ${retryCount + 1}/20 in 3s...`);
+                                        setTimeout(() => loadStream(quality), 3000);
+                                    } else {
+                                        video.dataset.hlsRetry = '0';
+                                        if (loadingOverlay) loadingOverlay.style.display = 'none';
+                                        if (statusSpan) statusSpan.textContent = `❌ Поток недоступен`;
+                                    }
+                                }
+                            });
+                        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                            video.src = hlsUrl;
+                            video.addEventListener('loadedmetadata', function () {
+                                video.play();
+                                if (loadingOverlay) loadingOverlay.style.display = 'none';
+                                if (statusSpan) statusSpan.textContent = `✅ ${quality} (Native)`;
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Stream load error:', err);
+                        if (loadingTimeout) clearTimeout(loadingTimeout);
+                        if (loadingOverlay) loadingOverlay.style.display = 'none';
+                        if (statusSpan) statusSpan.textContent = '⚠️ Ошибка сети';
+                    });
+            }
+
+            document.getElementById('video-quality').addEventListener('change', function () {
+                currentQuality = this.value;
+                localStorage.setItem('video-quality', currentQuality);
+                loadStream(currentQuality);
+            });
+
+            // ✅ Wait for initCameraSettings to populate the dropdown before loading stream
+            fetch(`${API_BASE}/camera/status`)
+                .then(r => r.json())
+                .then(data => {
+                    const src = data.source || 'none';
+                    const q = data.quality || currentQuality;
+                    document.getElementById('camera-source').value = src;
+                    currentQuality = q;
+                    document.getElementById('video-quality').value = q;
+                    localStorage.setItem('video-quality', q);
+                    if (src && src !== 'none') {
+                        loadStream(q);
+                    }
+                })
+                .catch(() => {
+                    // fallback: try loading anyway
+                    loadStream(currentQuality);
+                });
+
+            // ✅ FIX: Когда пользователь возвращается на вкладку — сразу прыгать к live (нет задержки)
+            document.addEventListener('visibilitychange', function () {
+                if (document.visibilityState === 'visible') {
+                    const video = document.getElementById('camera-stream');
+                    if (!video) return;
+
+                    // Если hls.js активен — попытаться обновить позицию на live edge
+                    if (hlsInstance && hlsInstance.liveSyncPosition) {
+                        const livePos = hlsInstance.liveSyncPosition;
+                        if (livePos && video.currentTime < livePos - 2) {
+                            console.log('[LIVE] Tab returned — jumping to live edge:', livePos);
+                            video.currentTime = livePos;
+                        }
+                    } else if (video.duration && !isNaN(video.duration) && isFinite(video.duration)) {
+                        // Fallback: прыгнуть к концу буфера
+                        const end = video.buffered.length > 0 ? video.buffered.end(video.buffered.length - 1) : video.duration;
+                        if (end - video.currentTime > 3) {
+                            console.log('[LIVE] Tab returned — fast-forwarding to buffered end:', end);
+                            video.currentTime = end;
+                        }
+                    }
+                }
+            });
+
+            async function startWebRTC() {
+                const video = document.getElementById('camera-stream');
+                const overlay = document.getElementById('camera-overlay');
+                const statusSpan = document.getElementById('quality-status');
+
+                return new Promise(async (resolve, reject) => {
+                    let timeoutId;
+
+                    try {
+                        // ✅ Check if running on HTTPS
+                        if (window.location.protocol !== 'https:') {
+                            const httpsUrl = `https://${window.location.hostname}:9100`;
+                            statusSpan.textContent = `❌ WebRTC requires HTTPS`;
+                            alert(`WebRTC requires HTTPS.\n\nPlease access the system at:\n${httpsUrl}`);
+                            // Switch back to previous source
+                            document.getElementById('camera-source').value = 'imou';
+                            reject(new Error('HTTPS required for WebRTC'));
+                            return;
+                        }
+
+                        statusSpan.textContent = "Requesting Camera Access...";
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                        video.srcObject = stream;
+                        video.play();
+                        video.style.display = 'block';
+                        document.getElementById('camera-image').style.display = 'none';
+
+                        statusSpan.textContent = "Establishing Peer Connection...";
+
+                        const pc = new RTCPeerConnection();
+
+                        // ✅ Monitor connection state
+                        pc.onconnectionstatechange = () => {
+                            console.log('WebRTC Connection State:', pc.connectionState);
+
+                            if (pc.connectionState === 'connected') {
+                                clearTimeout(timeoutId);
+                                statusSpan.textContent = "✅ Connected (WebRTC)";
+                                console.log('✅ WebRTC peer connection established successfully');
+                                resolve(pc);
+                            } else if (pc.connectionState === 'failed') {
+                                clearTimeout(timeoutId);
+                                const error = new Error('WebRTC connection failed');
+                                statusSpan.textContent = "❌ Connection Failed";
+                                console.error('WebRTC connection failed');
+                                reject(error);
+                            } else if (pc.connectionState === 'disconnected') {
+                                statusSpan.textContent = "⚠️ Disconnected";
+                                console.warn('WebRTC connection disconnected');
+                            }
+                        };
+
+                        // ✅ Add ICE connection state monitoring for additional debugging
+                        pc.oniceconnectionstatechange = () => {
+                            console.log('ICE Connection State:', pc.iceConnectionState);
+                        };
+
+                        // Add tracks
+                        stream.getTracks().forEach(track => pc.addTrack(track, stream));
+
+                        // Create Offer
+                        const offer = await pc.createOffer();
+                        await pc.setLocalDescription(offer);
+
+                        statusSpan.textContent = "Sending Offer to Server...";
+
+                        // Send to Server
+                        const response = await fetch(`${API_BASE}/webrtc/offer`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                sdp: pc.localDescription.sdp,
+                                type: pc.localDescription.type
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error("Server rejected WebRTC offer: " + response.status);
+                        }
+
+                        const answer = await response.json();
+                        await pc.setRemoteDescription(answer);
+
+                        statusSpan.textContent = "Waiting for Connection...";
+
+                        // ✅ Set timeout for connection establishment (10 seconds)
+                        timeoutId = setTimeout(() => {
+                            if (pc.connectionState !== 'connected') {
+                                const error = new Error('WebRTC connection timeout (10s)');
+                                statusSpan.textContent = "❌ Timeout";
+                                console.error('WebRTC connection timeout');
+                                pc.close();
+                                reject(error);
+                            }
+                        }, 10000);
+
+                    } catch (e) {
+                        clearTimeout(timeoutId);
+                        console.error("WebRTC Error:", e);
+
+                        // Differentiate error types for better user feedback
+                        let errorMsg = e.message;
+                        if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+                            errorMsg = "Camera permission denied";
+                        } else if (e.name === 'NotFoundError') {
+                            errorMsg = "No camera found";
+                        } else if (e.message.includes('Server rejected')) {
+                            errorMsg = "Server connection failed";
+                        }
+
+                        statusSpan.textContent = "⚠️ " + errorMsg;
+                        reject(e);
+                    }
+                });
+            }
+
+            // Expose to global scope for updateCameraSettings to call if needed, 
+            // though loadStream calls it.
+            window.startWebRTC = startWebRTC;
+            window.loadStream = loadStream;
+
+            function resizeCanvas() {
+                const media = (image.style.display !== 'none') ? image : video;
+                const rect = media.getBoundingClientRect();
+                const nativeW = media.videoWidth || media.naturalWidth || rect.width;
+                const nativeH = media.videoHeight || media.naturalHeight || rect.height;
+                canvas.width = nativeW;
+                canvas.height = nativeH;
+                canvas.style.width = media.clientWidth + 'px';
+                canvas.style.height = media.clientHeight + 'px';
+            }
+
+            function drawOverlay() {
+                if (video.readyState < 2 || video.videoWidth === 0) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    return;
+                }
+                resizeCanvas();
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                fetch(`${API_BASE}/currently_visible`)
+                    .then(resp => resp.json())
+                    .then(data => {
+                        if (!data.overlay) return;
+                        data.overlay.forEach(person => {
+                            const [x, y, w, h] = person.bbox;
+                            const scaleX = canvas.width / video.videoWidth;
+                            const scaleY = canvas.height / video.videoHeight;
+                            const bx = x * scaleX;
+                            const by = y * scaleY;
+                            const bw = w * scaleX;
+                            const bh = h * scaleY;
+
+                            ctx.strokeStyle = person.is_employee ? '#10b981' : '#0ea5e9';
+                            ctx.lineWidth = 3;
+                            ctx.strokeRect(bx, by, bw, bh);
+
+                            const label = person.name || (person.is_employee ? 'Сотрудник' : 'Посетитель');
+                            ctx.font = 'bold 18px Geist, sans-serif';
+                            const textWidth = ctx.measureText(label).width;
+                            ctx.fillStyle = person.is_employee ? 'rgba(16,185,129,0.85)' : 'rgba(14,165,233,0.85)';
+                            ctx.fillRect(bx, by - 26, textWidth + 16, 24);
+                            ctx.fillStyle = '#fff';
+                            ctx.fillText(label, bx + 8, by - 8);
+                        });
+                    });
+            }
+
+            video.onloadedmetadata = resizeCanvas;
+            image.onload = resizeCanvas;
+            // setInterval(drawOverlay, 2000); // ❌ DISABLED: Replaced by WebSocket overlay
+        }
+
+        function setupRectDrawing() {
+            const video = document.getElementById('camera-stream');
+            const image = document.getElementById('camera-image');
+            const rectCanvas = document.getElementById('camera-rect');
+            const saveBtn = document.getElementById('save-rect-btn');
+
+            let isDrawing = false;
+            let startX = 0, startY = 0, endX = 0, endY = 0;
+            let rect = null;
+
+            function getActiveMedia() {
+                return (image && image.style.display !== 'none') ? image : video;
+            }
+
+            function getVideoScale() {
+                const media = getActiveMedia();
+                const mediaRect = media.getBoundingClientRect();
+                const nativeW = media.videoWidth || media.naturalWidth || 1;
+                const nativeH = media.videoHeight || media.naturalHeight || 1;
+                const scaleX = nativeW / mediaRect.width;
+                const scaleY = nativeH / mediaRect.height;
+                return { scaleX, scaleY };
+            }
+
+            function drawRect() {
+                const ctx = rectCanvas.getContext('2d');
+                ctx.clearRect(0, 0, rectCanvas.width, rectCanvas.height);
+                if (!rect) return;
+                ctx.strokeStyle = '#ef4444';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([8, 6]);
+                ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+                ctx.setLineDash([]);
+            }
+
+            function resizeRectCanvas() {
+                const media = getActiveMedia();
+                rectCanvas.width = media.clientWidth;
+                rectCanvas.height = media.clientHeight;
+                rectCanvas.style.width = media.clientWidth + 'px';
+                rectCanvas.style.height = media.clientHeight + 'px';
+            }
+
+            window.addEventListener('resize', resizeRectCanvas);
+            video.addEventListener('loadedmetadata', resizeRectCanvas);
+            image.addEventListener('load', resizeRectCanvas);
+
+            rectCanvas.addEventListener('mousedown', function (e) {
+                resizeRectCanvas();
+                isDrawing = true;
+                const rectC = rectCanvas.getBoundingClientRect();
+                startX = e.clientX - rectC.left;
+                startY = e.clientY - rectC.top;
+                endX = startX;
+                endY = startY;
+                rect = { x: startX, y: startY, w: 0, h: 0 };
+                drawRect();
+            });
+
+            rectCanvas.addEventListener('mousemove', function (e) {
+                if (!isDrawing) return;
+                const rectC = rectCanvas.getBoundingClientRect();
+                endX = e.clientX - rectC.left;
+                endY = e.clientY - rectC.top;
+                rect = {
+                    x: Math.min(startX, endX),
+                    y: Math.min(startY, endY),
+                    w: Math.abs(endX - startX),
+                    h: Math.abs(endY - startY)
+                };
+                drawRect();
+            });
+
+            rectCanvas.addEventListener('mouseup', function (e) {
+                if (!isDrawing) return;
+                isDrawing = false;
+                if (rect && rect.w > 20 && rect.h > 20) {
+                    saveBtn.style.display = '';
+                } else {
+                    rect = null;
+                    saveBtn.style.display = 'none';
+                }
+                drawRect();
+            });
+
+            saveBtn.addEventListener('click', async function () {
+                if (!rect) return;
+                let image_base64 = null;
+
+                try {
+                    const canvas = document.createElement('canvas');
+                    const media = getActiveMedia();
+                    const nativeW = media.videoWidth || media.naturalWidth;
+                    const nativeH = media.videoHeight || media.naturalHeight;
+                    canvas.width = rect.w * (nativeW / media.clientWidth);
+                    canvas.height = rect.h * (nativeH / media.clientHeight);
+
+                    const ctx = canvas.getContext('2d');
+                    const sx = rect.x * (nativeW / media.clientWidth);
+                    const sy = rect.y * (nativeH / media.clientHeight);
+                    const sw = rect.w * (nativeW / media.clientWidth);
+                    const sh = rect.h * (nativeH / media.clientHeight);
+                    ctx.drawImage(media, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+                    image_base64 = canvas.toDataURL('image/jpeg', 0.9);
+                } catch (err) {
+                    console.error("Frame capture failed (likely CORS):", err);
+                }
+
+                const name = prompt('Введите имя клиента (необязательно):', '');
+                saveBtn.textContent = 'Сохраняю...';
+                saveBtn.disabled = true;
+
+                const { scaleX, scaleY } = getVideoScale();
+                const x = Math.round(rect.x * scaleX);
+                const y = Math.round(rect.y * scaleY);
+                const w = Math.round(rect.w * scaleX);
+                const h = Math.round(rect.h * scaleY);
+
+                try {
+                    const resp = await fetch(`${API_BASE}/save_face_rect`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ x, y, w, h, name, image_base64 })
+                    });
+                    const data = await resp.json();
+                    if (resp.ok && data.success) {
+                        alert('✅ Лицо/фото успешно сохранено!');
+                        if (typeof loadData === 'function') loadData();
+                        //if (typeof updateActiveCameraVisitors === "function") updateActiveCameraVisitors(); // DISABLED - Using WebSocket
+                        if (typeof switchTab === 'function') switchTab('clients');
+                    } else {
+                        alert('❌ Ошибка: ' + (data.detail || 'Не удалось сохранить'));
+                    }
+                } catch (e) {
+                    alert('❌ Ошибка при сохранении');
+                }
+
+                saveBtn.textContent = 'Сохранить выделенное лицо';
+                saveBtn.disabled = false;
+                rect = null;
+                drawRect();
+                saveBtn.style.display = 'none';
+            });
+
+            rectCanvas.addEventListener('dblclick', function () {
+                rect = null;
+                drawRect();
+                saveBtn.style.display = 'none';
+            });
+
+            setTimeout(resizeRectCanvas, 500);
+        }
+    </script>
+</body>
+
+</html>

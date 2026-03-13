@@ -1,0 +1,17 @@
+[Unit]
+Description=Face Recognition System API and Stream
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/var/www/face_recognition/face_system
+Environment="PATH=/var/www/face_recognition/face_system/venv/bin:/usr/bin"
+Environment="HEADLESS=1"
+ExecStart=/var/www/face_recognition/face_system/venv/bin/python /var/www/face_recognition/face_system/run.py
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=face_system
+
+[Install]
+WantedBy=multi-user.target
