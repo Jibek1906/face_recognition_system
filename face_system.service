@@ -7,6 +7,7 @@ User=root
 WorkingDirectory=/var/www/face_recognition/face_system
 Environment="PATH=/var/www/face_recognition/face_system/venv/bin:/usr/bin"
 Environment="HEADLESS=1"
+EnvironmentFile=/var/www/face_recognition/face_system/.env
 ExecStart=/var/www/face_recognition/face_system/venv/bin/python /var/www/face_recognition/face_system/run.py
 Restart=always
 StandardOutput=syslog

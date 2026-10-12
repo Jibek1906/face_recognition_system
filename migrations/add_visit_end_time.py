@@ -16,7 +16,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sqlalchemy import text
-from db import get_session
+from face_app.db.session import get_session
 
 def migrate():
     """Add end_time column to visits table"""
